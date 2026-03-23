@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.OperateLogMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.OperateLog">
+        <id column="id" property="id"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_role" property="operatorRole"/>
+        <result column="content" property="content"/>
+        <result column="operate_ip" property="operateIp"/>
+        <result column="operate_time" property="operateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, operator_id, operator_role, content, operate_ip, operate_time
+    </sql>
+
+    <insert id="insert" parameterType="com.appointment.entity.OperateLog">
+        INSERT INTO operate_log (operator_id, operator_role, content, operate_ip, operate_time)
+        VALUES (#{operatorId}, #{operatorRole}, #{content}, #{operateIp}, NOW())
+    </insert>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM operate_log
+        ORDER BY operate_time DESC
+    </select>
+
+    <select id="selectByOperatorId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM operate_log
+        WHERE operator_id = #{operatorId}
+        ORDER BY operate_time DESC
+    </select>
+</mapper>

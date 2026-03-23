@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗预约系统 - 医生工作台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .doctor-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: 220px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+        }
+        
+        .menu-item:hover {
+            background: #f5f7fa;
+            color: #667eea;
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            margin-bottom: 25px;
+        }
+        
+        .content-header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* 隐藏内容 */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* 排班日历样式 */
+        .schedule-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px;
+            min-height: 100px;
+            text-align: center;
+        }
+        
+        .calendar-day-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .calendar-day-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+        
+        .schedule-item {
+            background: #e3f2fd;
+            border-radius: 3px;
+            padding: 5px;
+            margin: 2px 0;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        /* 叫号面板 */
+        .call-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .current-number {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .waiting-count {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .call-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .call-btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .call-btn.next {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .call-btn.recall {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .call-btn.skip {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .call-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .current-info {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        
+        .current-info span {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .waiting-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .waiting-item.active {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        
+        .waiting-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2196f3;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+        
+        .waiting-info {
+            flex: 1;
+        }
+        
+        .waiting-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .waiting-phone {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <h1>🏥 医疗预约系统 - 医生工作台</h1>
+        <div class="header-right">
+            <div class="doctor-info">
+                <span>👨‍⚕️</span>
+                <span id="doctorName">医生</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 主体布局 -->
+    <div class="main-container">
+        <!-- 左侧菜单 -->
+        <div class="sidebar">
+            <div class="menu-item active" onclick="showSection('dashboard')">
+                <span>📊</span> 工作台
+            </div>
+            <div class="menu-item" onclick="showSection('schedule')">
+                <span>📅</span> 排班管理
+            </div>
+            <div class="menu-item" onclick="showSection('numbersource')">
+                <span>🎫</span> 号源管理
+            </div>
+            <div class="menu-item" onclick="showSection('appointment')">
+                <span>📋</span> 预约列表
+            </div>
+            <div class="menu-item" onclick="showSection('call')">
+                <span>🔊</span> 诊间叫号
+            </div>
+            <div class="menu-item" onclick="showSection('profile')">
+                <span>👤</span> 个人信息
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content">
+            <!-- 消息提示 -->
+            <div class="message" id="message"></div>
+
+            <!-- 工作台页面 -->
+            <div class="content-section active" id="dashboard-section">
+                <div class="content-header">
+                    <h2>医生工作台</h2>
+                </div>
+                
+                <!-- 今日概览 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">今日概览</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                        <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 32px; font-weight: bold;" id="todayAppointment">12</div>
+                            <div style="margin-top: 5px;">今日预约</div>
+                        </div>
+                        <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 32px; font-weight: bold;" id="waitingCount">5</div>
+                            <div style="margin-top: 5px;">待就诊</div>
+                        </div>
+                        <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 32px; font-weight: bold;" id="completedCount">7</div>
+                            <div style="margin-top: 5px;">已完成</div>
+                        </div>
+                        <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 32px; font-weight: bold;" id="cancelledCount">0</div>
+                            <div style="margin-top: 5px;">已取消</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 今日预约列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">今日预约</span>
+                        <button class="btn btn-primary" onclick="showSection('call')">开始叫号</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>患者姓名</th>
+                                <th>预约时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayAppointmentBody">
+                            <tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 排班管理页面 -->
+            <div class="content-section" id="schedule-section">
+                <div class="content-header">
+                    <h2>排班管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">我的排班（系统自动维护未来两周排班）</span>
+                        <div>
+                            <button class="btn btn-primary" onclick="openScheduleModal()">+ 新增排班</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 排班日历 -->
+                    <div class="schedule-calendar" id="scheduleCalendar">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 号源管理页面 -->
+            <div class="content-section" id="numbersource-section">
+                <div class="content-header">
+                    <h2>号源管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">号源列表</span>
+                        <button class="btn btn-primary" onclick="openNumberSourceModal()">+ 发布号源</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>时间段</th>
+                                <th>总号数</th>
+                                <th>已预约</th>
+                                <th>剩余</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="numberSourceBody">
+                            <tr>
+                                <td>2024-01-20</td>
+                                <td>09:00-09:30</td>
+                                <td>5</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>可预约</td>
+                                <td>
+                                    <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">关闭</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 预约列表页面 -->
+            <div class="content-section" id="appointment-section">
+                <div class="content-header">
+                    <h2>预约列表</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">全部预约</span>
+                        <div>
+                            <input type="date" id="filterDate" style="padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                            <select id="filterStatus" style="padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; margin-left: 10px;">
+                                <option value="">全部状态</option>
+                                <option value="1">待就诊</option>
+                                <option value="3">已完成</option>
+                                <option value="4">已取消</option>
+                            </select>
+                            <button class="btn btn-primary" style="margin-left: 10px;" onclick="filterAppointments()">筛选</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>预约号</th>
+                                <th>患者姓名</th>
+                                <th>手机号</th>
+                                <th>预约日期</th>
+                                <th>时间段</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 诊间叫号页面 -->
+            <div class="content-section" id="call-section">
+                <div class="content-header">
+                    <h2>诊间叫号</h2>
+                </div>
+                
+                <div class="call-panel">
+                    <div style="font-size: 18px; opacity: 0.9;">当前叫号</div>
+                    <div class="current-number" id="currentNumber">001</div>
+                    <div class="current-info">
+                        <div>患者姓名：<span id="currentPatient">-</span></div>
+                        <div>联系电话：<span id="currentPatientPhone">-</span></div>
+                    </div>
+                    <div class="waiting-count">等待人数：<span id="waitingNumber">0</span> 人</div>
+                    <div class="call-buttons">
+                        <button class="call-btn next" onclick="callNext()">🔊 叫下一个</button>
+                        <button class="call-btn recall" onclick="recall()">🔁 重叫</button>
+                        <button class="call-btn skip" onclick="skipPatient()">⏭ 跳过</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">等待队列</span>
+                    </div>
+                    <div id="waitingList" style="padding: 20px;">
+                        <div style="text-align: center; color: #999;">点击"叫下一个"开始叫号</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个人信息页面 -->
+            <div class="content-section" id="profile-section">
+                <div class="content-header">
+                    <h2>个人信息</h2>
+                </div>
+                <div class="card">
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>医生姓名</label>
+                            <input type="text" id="profileName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>登录账号</label>
+                            <input type="text" id="profileAccount" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>所属科室</label>
+                            <input type="text" id="profileDept" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>职称</label>
+                            <input type="text" id="profileTitle">
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话</label>
+                            <input type="tel" id="profilePhone">
+                        </div>
+                        <div class="form-group">
+                            <label>个人简介</label>
+                            <textarea id="profileRemark" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">修改密码</span>
+                    </div>
+                    <form id="pwdForm">
+                        <div class="form-group">
+                            <label>旧密码</label>
+                            <input type="password" id="oldPwd" required>
+                        </div>
+                        <div class="form-group">
+                            <label>新密码</label>
+                            <input type="password" id="newPwd" required>
+                        </div>
+                        <div class="form-group">
+                            <label>确认新密码</label>
+                            <input type="password" id="confirmPwd" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">修改密码</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 排班模态框 -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">新增排班</span>
+                <button class="modal-close" onclick="closeScheduleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleForm">
+                    <div class="form-group">
+                        <label>排班日期 *</label>
+                        <input type="date" id="scheduleDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>排班时段 *</label>
+                        <select id="schedulePeriod" required>
+                            <option value="">请选择</option>
+                            <option value="morning">上午 (08:00-12:00)</option>
+                            <option value="afternoon">下午 (14:00-17:00)</option>
+                            <option value="evening">晚上 (18:00-21:00)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>就诊地址</label>
+                        <input type="text" id="scheduleAddress" placeholder="如：门诊楼3楼内科诊室">
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="scheduleRemark" rows="3" placeholder="其他说明"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeScheduleModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="saveSchedule()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 号源模态框 -->
+    <div class="modal" id="numberSourceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">发布号源</span>
+                <button class="modal-close" onclick="closeNumberSourceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="numberSourceForm">
+                    <div class="form-group">
+                        <label>选择排班 *</label>
+                        <select id="nsScheduleId" required>
+                            <option value="">请选择排班</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>时间段 *</label>
+                        <input type="text" id="nsTimeRange" placeholder="如：09:00-09:30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>号源数量 *</label>
+                        <input type="number" id="nsTotalNum" min="1" value="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>挂号费（元）</label>
+                        <input type="number" id="nsPrice" min="0" step="0.01" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeNumberSourceModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="saveNumberSource()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API基础地址
+        const API_BASE_URL = 'http://localhost:8083';
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('doctorToken');
+            const doctorInfo = localStorage.getItem('doctorInfo');
+            
+            if (!token || !doctorInfo) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 显示医生名称
+            const doctor = JSON.parse(doctorInfo);
+            document.getElementById('doctorName').textContent = doctor.name || '医生';
+            
+            // 加载个人信息
+            loadProfile();
+            
+            // 加载排班日历
+            loadScheduleCalendar();
+            
+            // 加载号源列表
+            loadNumberSourceList();
+            
+            // 加载预约列表
+            loadAppointmentList();
+            
+            // 加载待就诊患者
+            loadWaitingPatients();
+            
+            // 加载今日预约
+            loadTodayAppointments();
+        });
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('doctorToken');
+            localStorage.removeItem('doctorInfo');
+            window.location.href = 'login.html';
+        }
+        
+        // 显示消息
+        function showMessage(msg, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 切换内容区域
+        function showSection(section) {
+            // 隐藏所有区域
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // 移除所有菜单激活状态
+            document.querySelectorAll('.menu-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // 显示选中区域
+            document.getElementById(`${section}-section`).classList.add('active');
+            
+            // 激活对应菜单
+            event.target.closest('.menu-item').classList.add('active');
+        }
+        
+        // ==================== 个人信息 ====================
+        
+        function loadProfile() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            if (doctorInfo) {
+                document.getElementById('profileName').value = doctorInfo.name || '';
+                document.getElementById('profileAccount').value = doctorInfo.doctorAccount || '';
+                document.getElementById('profileDept').value = doctorInfo.deptName || '';
+                document.getElementById('profileTitle').value = doctorInfo.title || '';
+                document.getElementById('profilePhone').value = doctorInfo.phone || '';
+                document.getElementById('profileRemark').value = doctorInfo.remark || '';
+            }
+        }
+        
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showMessage('个人信息保存成功', 'success');
+        });
+        
+        document.getElementById('pwdForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const oldPwd = document.getElementById('oldPwd').value;
+            const newPwd = document.getElementById('newPwd').value;
+            const confirmPwd = document.getElementById('confirmPwd').value;
+            
+            if (newPwd !== confirmPwd) {
+                showMessage('两次输入的新密码不一致', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/pwd/modify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({ oldPwd, newPwd })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage('密码修改成功', 'success');
+                    document.getElementById('pwdForm').reset();
+                } else {
+                    showMessage(data.msg || '密码修改失败', 'error');
+                }
+            } catch (error) {
+                console.error('修改密码错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        });
+        
+        // ==================== 排班管理 ====================
+        
+        function loadScheduleCalendar() {
+            const calendar = document.getElementById('scheduleCalendar');
+            calendar.innerHTML = '';
+            
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            fetch(`${API_BASE_URL}/api/doctor/schedule/list?doctorId=${doctorInfo.id}`, {
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const schedules = data.data;
+                    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                    
+                    if (schedules.length === 0) {
+                        calendar.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">暂无排班记录</div>';
+                        return;
+                    }
+                    
+                    const scheduleMap = {};
+                    schedules.forEach(schedule => {
+                        if (!scheduleMap[schedule.visitDate]) {
+                            scheduleMap[schedule.visitDate] = [];
+                        }
+                        scheduleMap[schedule.visitDate].push(schedule.visitTime);
+                    });
+                    
+                    const dates = Object.keys(scheduleMap).sort();
+                    const displayDates = dates.slice(0, 14);
+                    
+                    displayDates.forEach(date => {
+                        const dateObj = new Date(date);
+                        const weekDay = weekDays[dateObj.getDay()];
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const dateStr = `${month}-${day}`;
+                        
+                        const times = scheduleMap[date];
+                        let timesHtml = '';
+                        times.forEach(time => {
+                            timesHtml += `<div class="schedule-item">${time}</div>`;
+                        });
+                        
+                        const dayDiv = document.createElement('div');
+                        dayDiv.className = 'calendar-day';
+                        dayDiv.innerHTML = `
+                            <div class="calendar-day-header">${weekDay}</div>
+                            <div class="calendar-day-date">${dateStr}</div>
+                            ${timesHtml}
+                        `;
+                        calendar.appendChild(dayDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('加载排班错误:', error);
+            });
+        }
+        
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').classList.add('active');
+        }
+        
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+        
+        async function saveSchedule() {
+            const date = document.getElementById('scheduleDate').value;
+            const period = document.getElementById('schedulePeriod').value;
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            if (!date || !period) {
+                showMessage('请填写完整信息', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/schedule/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({
+                        doctorId: doctorInfo.id,
+                        date: date,
+                        period: period
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage('排班添加成功', 'success');
+                    closeScheduleModal();
+                    loadScheduleCalendar();
+                } else {
+                    showMessage(data.msg || '排班添加失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存排班错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        async function autoSchedule() {
+            if (!confirm('确定要自动生成未来两周的排班吗？\n（每天上午和下午各一个班次，周日休息）')) {
+                return;
+            }
+            
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/schedule/auto`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({ doctorId: doctorInfo.id })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage(`自动排班成功，创建了 ${data.data.createdCount} 个班次`, 'success');
+                    loadScheduleCalendar();
+                    loadNumberSourceList();
+                } else {
+                    showMessage(data.msg || '自动排班失败', 'error');
+                }
+            } catch (error) {
+                console.error('自动排班错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        async function cleanExpiredSchedules() {
+            if (!confirm('确定要清理过期的排班吗？\n（只会删除今天之前且没有预约记录的排班）')) {
+                return;
+            }
+            
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/schedule/cleanExpired?doctorId=${doctorInfo.id}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage(`清理完成，删除了 ${data.data.deletedCount} 个过期排班`, 'success');
+                    loadScheduleCalendar();
+                    loadNumberSourceList();
+                } else {
+                    showMessage(data.msg || '清理失败', 'error');
+                }
+            } catch (error) {
+                console.error('清理过期排班错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // ==================== 号源管理 ====================
+        
+        function openNumberSourceModal() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            // 加载排班列表
+            fetch(`${API_BASE_URL}/api/doctor/schedule/list?doctorId=${doctorInfo.id}`, {
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const select = document.getElementById('nsScheduleId');
+                    select.innerHTML = '<option value="">请选择排班</option>';
+                    
+                    data.data.forEach(schedule => {
+                        const option = document.createElement('option');
+                        option.value = schedule.id;
+                        option.textContent = `${schedule.visitDate} ${schedule.visitTime}`;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            document.getElementById('numberSourceModal').classList.add('active');
+        }
+        
+        function closeNumberSourceModal() {
+            document.getElementById('numberSourceModal').classList.remove('active');
+        }
+        
+        async function saveNumberSource() {
+            const scheduleId = document.getElementById('nsScheduleId').value;
+            const totalNum = document.getElementById('nsTotalNum').value;
+            const fee = document.getElementById('nsPrice').value;
+            
+            if (!scheduleId || !totalNum || !fee) {
+                showMessage('请填写完整信息', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/numbersource/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({
+                        scheduleId: parseInt(scheduleId),
+                        totalNum: parseInt(totalNum),
+                        fee: parseInt(fee)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage('号源发布成功', 'success');
+                    closeNumberSourceModal();
+                    loadNumberSourceList();
+                } else {
+                    showMessage(data.msg || '号源发布失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存号源错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        function loadNumberSourceList() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            fetch(`${API_BASE_URL}/api/doctor/numbersource/list?doctorId=${doctorInfo.id}`, {
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    renderNumberSourceTable(data.data);
+                }
+            })
+            .catch(error => {
+                console.error('加载号源列表错误:', error);
+            });
+        }
+        
+        function renderNumberSourceTable(numberSources) {
+            const tbody = document.getElementById('numberSourceBody');
+            tbody.innerHTML = '';
+            
+            if (numberSources.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无号源记录</td></tr>';
+                return;
+            }
+            
+            numberSources.forEach(ns => {
+                const statusText = ns.status === 0 ? '可预约' : ns.status === 1 ? '已下架' : ns.status === 2 ? '已约满' : '已结束';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${ns.visitDate || '-'}</td>
+                    <td>${ns.visitTime || '-'}</td>
+                    <td>${ns.totalNum}</td>
+                    <td>${ns.totalNum - ns.remainNum}</td>
+                    <td>${ns.remainNum}</td>
+                    <td>${statusText}</td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteNumberSource(${ns.id})">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function closeNumberSource(id) {
+            if (!confirm('确定要关闭该号源吗？')) {
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/api/doctor/numbersource/close?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showMessage('号源关闭成功', 'success');
+                    loadNumberSourceList();
+                } else {
+                    showMessage(data.msg || '关闭失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('关闭号源错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            });
+        }
+        
+        function deleteNumberSource(id) {
+            if (!confirm('确定要删除该号源吗？删除后无法恢复！')) {
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/api/doctor/numbersource/delete?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showMessage('号源删除成功', 'success');
+                    loadNumberSourceList();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除号源错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            });
+        }
+        
+        function editNumberSource(id) {
+            showMessage('编辑功能开发中', 'info');
+        }
+        
+        // ==================== 预约管理 ====================
+        
+        async function loadTodayAppointments() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/appointment/today?doctorId=${doctorInfo.id}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderTodayAppointments(data.data);
+                    
+                    // 更新统计数字
+                    const waiting = data.data.filter(a => a.status === 1).length;
+                    const completed = data.data.filter(a => a.status === 2).length;
+                    const cancelled = data.data.filter(a => a.status === 3).length;
+                    
+                    document.getElementById('waitingCount').textContent = waiting;
+                    document.getElementById('completedCount').textContent = completed;
+                    document.getElementById('cancelledCount').textContent = cancelled;
+                }
+            } catch (error) {
+                console.error('加载今日预约错误:', error);
+            }
+        }
+        
+        function renderTodayAppointments(appointments) {
+            const tbody = document.getElementById('todayAppointmentBody');
+            tbody.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">今日暂无预约</td></tr>';
+                return;
+            }
+            
+            appointments.forEach((app, index) => {
+                const statusText = app.status === 0 ? '待支付' : app.status === 1 ? '待就诊' : app.status === 2 ? '已完成' : '已取消';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${app.patientName}</td>
+                    <td>${app.visitTime || '-'}</td>
+                    <td>${statusText}</td>
+                    <td>
+                        ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="callPatientById(${app.id})">叫号</button>` : '-'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function callPatientById(appointmentId) {
+            showSection('call');
+            document.querySelector('.menu-item[onclick*="call"]').classList.add('active');
+        }
+        
+        async function loadAppointmentList() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderAppointmentTable(data.data);
+                } else {
+                    showMessage(data.msg || '加载预约列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载预约列表错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        function renderAppointmentTable(appointments) {
+            const tbody = document.getElementById('appointmentBody');
+            tbody.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无预约记录</td></tr>';
+                return;
+            }
+            
+            appointments.forEach(app => {
+                const statusMap = { 0: '待支付', 1: '待就诊', 2: '就诊中', 3: '已完成', 4: '已取消' };
+                const statusText = statusMap[app.status] || '未知';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${app.id}</td>
+                    <td>${app.patientName}</td>
+                    <td>${app.phone || '-'}</td>
+                    <td>${app.visitDate || '-'}</td>
+                    <td>${app.visitTime || '-'}</td>
+                    <td>${statusText}</td>
+                    <td>
+                        ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="startConsultation(${app.id})">开始就诊</button>` : ''}
+                        ${app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="completeAppointment(${app.id})">完成就诊</button>` : ''}
+                        ${app.status !== 1 && app.status !== 2 ? '-' : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function startConsultation(id) {
+            fetch(`${API_BASE_URL}/api/doctor/call/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': localStorage.getItem('doctorToken')
+                },
+                body: JSON.stringify({ appointmentId: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showMessage('开始就诊', 'success');
+                    loadAppointmentList();
+                    loadWaitingPatients();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('开始就诊错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            });
+        }
+        
+        function filterAppointments() {
+            const date = document.getElementById('filterDate').value;
+            const status = document.getElementById('filterStatus').value;
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            let url = `${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}`;
+            if (date) {
+                url += `&date=${date}`;
+            }
+            if (status) {
+                url += `&status=${status}`;
+            }
+            
+            fetch(url, {
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    renderAppointmentTable(data.data);
+                } else {
+                    showMessage(data.msg || '筛选失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('筛选预约错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            });
+        }
+        
+        function completeAppointment(id) {
+            if (!confirm('确定要完成该预约吗？')) {
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/api/doctor/appointment/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': localStorage.getItem('doctorToken')
+                },
+                body: JSON.stringify({ appointmentId: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    showMessage('就诊完成', 'success');
+                    loadAppointmentList();
+                    loadWaitingPatients();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('完成预约错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            });
+        }
+        
+        // ==================== 诊间叫号 ====================
+        
+        let currentNum = 1;
+        let appointmentList = [];
+        let currentIndex = 0;
+        
+        async function loadWaitingPatients() {
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/appointment/today?doctorId=${doctorInfo.id}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    appointmentList = data.data.filter(app => app.status === 1);
+                    currentIndex = 0;
+                    updateWaitingList();
+                }
+            } catch (error) {
+                console.error('加载待就诊患者错误:', error);
+            }
+        }
+        
+        function updateWaitingList() {
+            const waitingList = document.getElementById('waitingList');
+            waitingList.innerHTML = '';
+            
+            // 更新等待人数
+            document.getElementById('waitingNumber').textContent = appointmentList.length;
+            
+            if (appointmentList.length === 0) {
+                waitingList.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">暂无待就诊患者</div>';
+                return;
+            }
+            
+            appointmentList.forEach((app, index) => {
+                const div = document.createElement('div');
+                div.className = index === currentIndex ? 'waiting-item active' : 'waiting-item';
+                div.innerHTML = `
+                    <div class="waiting-number">${index + 1}</div>
+                    <div class="waiting-info">
+                        <div class="waiting-name">${app.patientName}</div>
+                        <div class="waiting-phone">${app.phone || '-'}</div>
+                    </div>
+                `;
+                waitingList.appendChild(div);
+            });
+        }
+        
+        function callNext() {
+            if (appointmentList.length === 0) {
+                showMessage('没有待就诊的患者', 'error');
+                return;
+            }
+            
+            if (currentIndex >= appointmentList.length) {
+                showMessage('所有患者已就诊完毕', 'info');
+                return;
+            }
+            
+            const currentPatient = appointmentList[currentIndex];
+            currentNum = currentIndex + 1;
+            
+            document.getElementById('currentNumber').textContent = String(currentNum).padStart(3, '0');
+            document.getElementById('currentPatient').textContent = currentPatient.patientName;
+            document.getElementById('currentPatientPhone').textContent = currentPatient.phone || '-';
+            
+            fetch(`${API_BASE_URL}/api/doctor/call/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': localStorage.getItem('doctorToken')
+                },
+                body: JSON.stringify({ appointmentId: currentPatient.id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    currentPatient.status = 2;
+                }
+            });
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${currentPatient.patientName}患者到诊室就诊`);
+                utterance.lang = 'zh-CN';
+                speechSynthesis.speak(utterance);
+            }
+            
+            updateWaitingList();
+            currentIndex++;
+        }
+        
+        function recall() {
+            if (currentNum === 0) {
+                showMessage('还没有叫号', 'error');
+                return;
+            }
+            
+            const patientIndex = currentNum - 1;
+            if (patientIndex < appointmentList.length) {
+                const patient = appointmentList[patientIndex];
+                document.getElementById('currentPatient').textContent = patient.patientName;
+                document.getElementById('currentPatientPhone').textContent = patient.userPhone || '-';
+                
+                // 播放重叫语音
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${patient.patientName}患者到诊室就诊`);
+                    utterance.lang = 'zh-CN';
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        }
+        
+        function skipPatient() {
+            if (currentIndex < appointmentList.length - 1) {
+                currentIndex++;
+                updateWaitingList();
+            }
+        }
+    </script>
+</body>
+</html>

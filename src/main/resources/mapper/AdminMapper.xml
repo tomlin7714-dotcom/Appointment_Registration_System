@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.AdminMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.Admin">
+        <id column="id" property="id"/>
+        <result column="admin_account" property="adminAccount"/>
+        <result column="pwd" property="pwd"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="create_time" property="createTime"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, admin_account, pwd, name, phone, create_time, last_login_time
+    </sql>
+
+    <select id="selectByAccount" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin
+        WHERE admin_account = #{adminAccount}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.Admin">
+        INSERT INTO admin (admin_account, pwd, name, phone)
+        VALUES (#{adminAccount}, #{pwd}, #{name}, #{phone})
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.Admin">
+        UPDATE admin
+        SET name = #{name}, phone = #{phone}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateLastLoginTime">
+        UPDATE admin
+        SET last_login_time = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

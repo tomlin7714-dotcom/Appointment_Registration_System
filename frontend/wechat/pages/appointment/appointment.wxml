@@ -1,0 +1,94 @@
+<!--pages/appointment/appointment.wxml-->
+<view class="page-container">
+  <!-- 医生信息卡片 -->
+  <view class="doctor-card">
+    <view class="doctor-avatar">{{doctorInfo.avatar || '👨‍⚕️'}}</view>
+    <view class="doctor-info">
+      <view class="doctor-name-wrapper">
+        <text class="doctor-name">{{doctorInfo.name}}</text>
+        <text class="doctor-title">{{doctorInfo.title}}</text>
+      </view>
+      <text class="doctor-dept">{{doctorInfo.deptName}}</text>
+      <text class="doctor-desc">{{doctorInfo.remark || '擅长各类常见病、多发病的诊治'}}</text>
+    </view>
+  </view>
+
+  <!-- 日期选择 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">选择日期</text>
+    </view>
+    <scroll-view class="date-list" scroll-x="true">
+      <view class="date-item {{selectedDate === item.date ? 'active' : ''}}" 
+            wx:for="{{dateList}}" 
+            wx:key="date" 
+            bindtap="selectDate" 
+            data-date="{{item.date}}">
+        <text class="date-week">{{item.week}}</text>
+        <text class="date-day">{{item.day}}</text>
+        <text class="date-status {{item.hasSource ? 'available' : 'full'}}">
+          {{item.hasSource ? '有号' : '约满'}}
+        </text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 时间段选择 -->
+  <view class="card" wx:if="{{timeSlots.length > 0}}">
+    <view class="card-header">
+      <text class="card-title">选择时间段</text>
+    </view>
+    <view class="time-grid">
+      <view class="time-item {{selectedTime === item.timeRange ? 'active' : ''}} {{item.remain <= 0 ? 'disabled' : ''}}" 
+            wx:for="{{timeSlots}}" 
+            wx:key="id" 
+            bindtap="selectTime" 
+            data-item="{{item}}">
+        <text class="time-range">{{item.timeRange}}</text>
+        <text class="time-price">¥{{item.price}}</text>
+        <text class="time-remain {{item.remain <= 0 ? 'full' : ''}}">
+          {{item.remain <= 0 ? '已满' : '剩余' + item.remain + '号'}}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card" wx:else>
+    <view class="empty-state">
+      <text class="empty-icon">📅</text>
+      <text class="empty-text">该日期暂无号源</text>
+    </view>
+  </view>
+
+  <!-- 就诊人信息 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">就诊人信息</text>
+    </view>
+    <view class="patient-info">
+      <view class="info-item">
+        <text class="info-label">姓名</text>
+        <text class="info-value">{{userInfo.name}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">手机号</text>
+        <text class="info-value">{{userInfo.phone}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">身份证号</text>
+        <text class="info-value">{{userInfo.idCard}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="price-info">
+      <text class="price-label">合计：</text>
+      <text class="price-value">¥{{selectedPrice}}</text>
+    </view>
+    <button class="submit-btn {{!canSubmit ? 'disabled' : ''}}" bindtap="submitAppointment" disabled="{{!canSubmit}}">
+      确认预约
+    </button>
+  </view>
+</view>

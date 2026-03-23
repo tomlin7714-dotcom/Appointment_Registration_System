@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.DeptMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.Dept">
+        <id column="id" property="id"/>
+        <result column="dept_name" property="deptName"/>
+        <result column="dept_desc" property="deptDesc"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, dept_name, dept_desc, create_time, update_time, status
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dept
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dept
+        WHERE status = 0
+        ORDER BY id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.Dept">
+        INSERT INTO dept (dept_name, dept_desc, status)
+        VALUES (#{deptName}, #{deptDesc}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.Dept">
+        UPDATE dept
+        SET dept_name = #{deptName}, dept_desc = #{deptDesc}, status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM dept WHERE id = #{id}
+    </delete>
+</mapper>

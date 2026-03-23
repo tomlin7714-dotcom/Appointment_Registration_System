@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗预约系统 - 管理员后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: 220px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+        }
+        
+        .menu-item:hover {
+            background: #f5f7fa;
+            color: #667eea;
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            margin-bottom: 25px;
+        }
+        
+        .content-header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* 隐藏内容 */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <h1>🏥 医疗预约管理系统</h1>
+        <div class="header-right">
+            <div class="admin-info">
+                <span>👤</span>
+                <span id="adminName">管理员</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 主体布局 -->
+    <div class="main-container">
+        <!-- 左侧菜单 -->
+        <div class="sidebar">
+            <div class="menu-item active" onclick="showSection('dashboard')">
+                <span>📊</span> 概览
+            </div>
+            <div class="menu-item" onclick="showSection('dept')">
+                <span>🏥</span> 科室管理
+            </div>
+            <div class="menu-item" onclick="showSection('doctor')">
+                <span>👨‍⚕️</span> 医生管理
+            </div>
+            <div class="menu-item" onclick="showSection('user')">
+                <span>👥</span> 用户管理
+            </div>
+            <div class="menu-item" onclick="showSection('log')">
+                <span>📝</span> 系统日志
+            </div>
+            <div class="menu-item" onclick="showSection('setting')">
+                <span>⚙️</span> 系统配置
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content">
+            <!-- 消息提示 -->
+            <div class="message" id="message"></div>
+
+            <!-- 概览页面 -->
+            <div class="content-section active" id="dashboard-section">
+                <div class="content-header">
+                    <h2>系统概览</h2>
+                </div>
+                <div class="card">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                        <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 36px; font-weight: bold;" id="deptCount">0</div>
+                            <div style="margin-top: 10px;">科室数量</div>
+                        </div>
+                        <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 36px; font-weight: bold;" id="doctorCount">0</div>
+                            <div style="margin-top: 10px;">医生数量</div>
+                        </div>
+                        <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 36px; font-weight: bold;" id="userCount">0</div>
+                            <div style="margin-top: 10px;">用户数量</div>
+                        </div>
+                        <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border-radius: 8px;">
+                            <div style="font-size: 36px; font-weight: bold;" id="appointmentCount">0</div>
+                            <div style="margin-top: 10px;">今日预约</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 科室管理页面 -->
+            <div class="content-section" id="dept-section">
+                <div class="content-header">
+                    <h2>科室管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">科室列表</span>
+                        <button class="btn btn-primary" onclick="openDeptModal()">+ 新增科室</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>科室名称</th>
+                                <th>科室简介</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deptTableBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 医生管理页面 -->
+            <div class="content-section" id="doctor-section">
+                <div class="content-header">
+                    <h2>医生管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">医生列表</span>
+                        <button class="btn btn-primary" onclick="openDoctorModal()">+ 新增医生</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>姓名</th>
+                                <th>账号</th>
+                                <th>科室</th>
+                                <th>职称</th>
+                                <th>电话</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorTableBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 用户管理页面 -->
+            <div class="content-section" id="user-section">
+                <div class="content-header">
+                    <h2>用户管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">用户列表</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>姓名</th>
+                                <th>手机号</th>
+                                <th>身份证号</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 系统日志页面 -->
+            <div class="content-section" id="log-section">
+                <div class="content-header">
+                    <h2>系统日志</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">操作日志</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>用户</th>
+                                <th>操作</th>
+                                <th>IP地址</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 系统配置页面 -->
+            <div class="content-section" id="setting-section">
+                <div class="content-header">
+                    <h2>系统配置</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">参数设置</span>
+                    </div>
+                    <form id="settingForm">
+                        <div class="form-group">
+                            <label>预约开始时间</label>
+                            <input type="time" id="appointStartTime" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label>预约结束时间</label>
+                            <input type="time" id="appointEndTime" value="17:00">
+                        </div>
+                        <div class="form-group">
+                            <label>每日最大预约数</label>
+                            <input type="number" id="maxAppointmentsPerDay" value="100">
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 科室模态框 -->
+    <div class="modal" id="deptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="deptModalTitle">新增科室</span>
+                <button class="modal-close" onclick="closeDeptModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="deptForm">
+                    <input type="hidden" id="deptId">
+                    <div class="form-group">
+                        <label>科室名称 *</label>
+                        <input type="text" id="deptName" required placeholder="请输入科室名称">
+                    </div>
+                    <div class="form-group">
+                        <label>科室简介</label>
+                        <textarea id="deptRemark" rows="4" placeholder="请输入科室简介"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeDeptModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="saveDept()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 医生模态框 -->
+    <div class="modal" id="doctorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="doctorModalTitle">新增医生</span>
+                <button class="modal-close" onclick="closeDoctorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="doctorForm">
+                    <input type="hidden" id="doctorId">
+                    <div class="form-group">
+                        <label>医生姓名 *</label>
+                        <input type="text" id="doctorName" required placeholder="请输入医生姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>登录账号 *</label>
+                        <input type="text" id="doctorAccount" required placeholder="请输入登录账号">
+                    </div>
+                    <div class="form-group">
+                        <label>登录密码 *</label>
+                        <input type="password" id="doctorPwd" required placeholder="请输入登录密码">
+                    </div>
+                    <div class="form-group">
+                        <label>所属科室 *</label>
+                        <select id="doctorDeptId" required>
+                            <option value="">请选择科室</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>职称</label>
+                        <input type="text" id="doctorTitle" placeholder="请输入职称，如：主任医师">
+                    </div>
+                    <div class="form-group">
+                        <label>电话</label>
+                        <input type="tel" id="doctorPhone" placeholder="请输入电话号码">
+                    </div>
+                    <div class="form-group">
+                        <label>简介</label>
+                        <textarea id="doctorRemark" rows="3" placeholder="请输入医生简介"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeDoctorModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                <button class="btn btn-primary" onclick="saveDoctor()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API基础地址
+        const API_BASE_URL = 'http://localhost:8083';
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            const adminInfo = localStorage.getItem('adminInfo');
+            
+            if (!token || !adminInfo) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 显示管理员名称
+            const admin = JSON.parse(adminInfo);
+            document.getElementById('adminName').textContent = admin.name || '管理员';
+            
+            // 加载概览数据
+            loadDashboardData();
+            
+            // 加载科室列表
+            loadDeptList();
+            
+            // 加载医生列表
+            loadDoctorList();
+            
+            // 加载用户列表
+            loadUserList();
+            
+            // 加载日志列表
+            loadLogList();
+        });
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminInfo');
+            window.location.href = 'login.html';
+        }
+        
+        // 显示消息
+        function showMessage(msg, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 切换内容区域
+        function showSection(section) {
+            // 隐藏所有区域
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // 移除所有菜单激活状态
+            document.querySelectorAll('.menu-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // 显示选中区域
+            document.getElementById(`${section}-section`).classList.add('active');
+            
+            // 激活对应菜单
+            event.target.closest('.menu-item').classList.add('active');
+        }
+        
+        // 加载概览数据
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/db`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    document.getElementById('deptCount').textContent = data.data.deptCount || 0;
+                    document.getElementById('doctorCount').textContent = data.data.doctorCount || 0;
+                    document.getElementById('userCount').textContent = data.data.userCount || 0;
+                    document.getElementById('appointmentCount').textContent = '0';
+                }
+            } catch (error) {
+                console.error('加载概览数据错误:', error);
+            }
+        }
+        
+        // ==================== 科室管理 ====================
+        
+        // 加载科室列表
+        async function loadDeptList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/dept/list`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderDeptTable(data.data);
+                    updateDeptSelect(data.data);
+                } else {
+                    showMessage(data.msg || '加载科室列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载科室列表错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 渲染科室表格
+        function renderDeptTable(depts) {
+            const tbody = document.getElementById('deptTableBody');
+            tbody.innerHTML = '';
+            
+            depts.forEach(dept => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dept.id}</td>
+                    <td>${dept.deptName || dept.name}</td>
+                    <td>${dept.deptDesc || dept.remark || '-'}</td>
+                    <td>${dept.createTime || '-'}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="editDept(${dept.id})" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteDept(${dept.id})" style="padding: 5px 10px; font-size: 12px;">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // 更新科室下拉框
+        function updateDeptSelect(depts) {
+            const select = document.getElementById('doctorDeptId');
+            select.innerHTML = '<option value="">请选择科室</option>';
+            
+            depts.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.id;
+                option.textContent = dept.deptName || dept.name;
+                select.appendChild(option);
+            });
+        }
+        
+        // 打开科室模态框
+        function openDeptModal() {
+            document.getElementById('deptModalTitle').textContent = '新增科室';
+            document.getElementById('deptForm').reset();
+            document.getElementById('deptId').value = '';
+            document.getElementById('deptModal').classList.add('active');
+        }
+        
+        // 关闭科室模态框
+        function closeDeptModal() {
+            document.getElementById('deptModal').classList.remove('active');
+        }
+        
+        // 编辑科室
+        function editDept(id) {
+            // 模拟编辑功能
+            document.getElementById('deptModalTitle').textContent = '编辑科室';
+            document.getElementById('deptId').value = id;
+            document.getElementById('deptModal').classList.add('active');
+        }
+        
+        // 保存科室
+        async function saveDept() {
+            const id = document.getElementById('deptId').value;
+            const name = document.getElementById('deptName').value.trim();
+            const remark = document.getElementById('deptRemark').value.trim();
+            
+            if (!name) {
+                showMessage('请输入科室名称', 'error');
+                return;
+            }
+            
+            try {
+                const url = id ? 
+                    `${API_BASE_URL}/api/admin/dept/modify` : 
+                    `${API_BASE_URL}/api/admin/dept/save`;
+                
+                const body = id ? 
+                    { id, name, remark } : 
+                    { name, remark };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage(id ? '修改成功' : '添加成功', 'success');
+                    closeDeptModal();
+                    loadDeptList();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存科室错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 删除科室
+        async function deleteDept(id) {
+            if (!confirm('确定要删除该科室吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/dept/del?id=${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage('删除成功', 'success');
+                    loadDeptList();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除科室错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // ==================== 医生管理 ====================
+        
+        // 加载医生列表
+        async function loadDoctorList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/doctor/list`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderDoctorTable(data.data);
+                } else {
+                    showMessage(data.msg || '加载医生列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载医生列表错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 渲染医生表格
+        function renderDoctorTable(doctors) {
+            const tbody = document.getElementById('doctorTableBody');
+            tbody.innerHTML = '';
+            
+            doctors.forEach(doctor => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${doctor.id}</td>
+                    <td>${doctor.name}</td>
+                    <td>${doctor.doctorAccount}</td>
+                    <td>${doctor.deptName || '-'}</td>
+                    <td>${doctor.title || '-'}</td>
+                    <td>${doctor.phone || '-'}</td>
+                    <td>${doctor.status === 0 ? '正常' : '禁用'}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="editDoctor(${doctor.id})" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteDoctor(${doctor.id})" style="padding: 5px 10px; font-size: 12px;">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // 打开医生模态框
+        function openDoctorModal() {
+            document.getElementById('doctorModalTitle').textContent = '新增医生';
+            document.getElementById('doctorForm').reset();
+            document.getElementById('doctorId').value = '';
+            document.getElementById('doctorModal').classList.add('active');
+        }
+        
+        // 关闭医生模态框
+        function closeDoctorModal() {
+            document.getElementById('doctorModal').classList.remove('active');
+        }
+        
+        // 编辑医生
+        function editDoctor(id) {
+            document.getElementById('doctorModalTitle').textContent = '编辑医生';
+            document.getElementById('doctorId').value = id;
+            document.getElementById('doctorModal').classList.add('active');
+        }
+        
+        // 保存医生
+        async function saveDoctor() {
+            const id = document.getElementById('doctorId').value;
+            const name = document.getElementById('doctorName').value.trim();
+            const doctorAccount = document.getElementById('doctorAccount').value.trim();
+            const pwd = document.getElementById('doctorPwd').value;
+            const deptId = document.getElementById('doctorDeptId').value;
+            const title = document.getElementById('doctorTitle').value.trim();
+            const phone = document.getElementById('doctorPhone').value.trim();
+            const remark = document.getElementById('doctorRemark').value.trim();
+            
+            if (!name || !doctorAccount || !deptId) {
+                showMessage('请填写必填项', 'error');
+                return;
+            }
+            
+            if (!id && !pwd) {
+                showMessage('请输入登录密码', 'error');
+                return;
+            }
+            
+            try {
+                const url = id ? 
+                    `${API_BASE_URL}/api/admin/doctor/modify` : 
+                    `${API_BASE_URL}/api/admin/doctor/save`;
+                
+                const body = {
+                    name,
+                    doctorAccount,
+                    deptId,
+                    title,
+                    phone,
+                    remark
+                };
+                
+                if (id) {
+                    body.id = id;
+                }
+                if (pwd) {
+                    body.pwd = pwd;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage(id ? '修改成功' : '添加成功', 'success');
+                    closeDoctorModal();
+                    loadDoctorList();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存医生错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 删除医生
+        async function deleteDoctor(id) {
+            if (!confirm('确定要删除该医生吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/doctor/del?id=${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage('删除成功', 'success');
+                    loadDoctorList();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除医生错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // ==================== 用户管理 ====================
+        
+        // 加载用户列表
+        async function loadUserList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/user/list`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderUserTable(data.data);
+                } else {
+                    showMessage(data.msg || '加载用户列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载用户列表错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 渲染用户表格
+        function renderUserTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.idCard}</td>
+                    <td>${user.status === 0 ? '正常' : '禁用'}</td>
+                    <td>${user.createTime || '-'}</td>
+                    <td>
+                        <button class="btn ${user.status === 0 ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus(${user.id}, ${user.status})" style="padding: 5px 10px; font-size: 12px;">${user.status === 0 ? '禁用' : '启用'}</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // 切换用户状态
+        async function toggleUserStatus(id, currentStatus) {
+            const action = currentStatus === 0 ? '禁用' : '启用';
+            if (!confirm(`确定要${action}该用户吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/user/status?id=${id}&status=${currentStatus === 1 ? 0 : 1}`, {
+                    method: 'GET',
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    showMessage(`${action}成功`, 'success');
+                    loadUserList();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('切换用户状态错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // ==================== 系统日志 ====================
+        
+        // 加载日志列表
+        async function loadLogList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/log/list`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    renderLogTable(data.data);
+                } else {
+                    showMessage(data.msg || '加载日志列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载日志列表错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 渲染日志表格
+        function renderLogTable(logs) {
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '';
+            
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.createTime || '-'}</td>
+                    <td>${log.username}</td>
+                    <td>${log.operation}</td>
+                    <td>${log.ip}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // ==================== 系统配置 ====================
+        
+        document.getElementById('settingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showMessage('设置保存成功', 'success');
+        });
+    </script>
+</body>
+</html>

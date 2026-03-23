@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.AppointmentMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.Appointment">
+        <id column="id" property="id"/>
+        <result column="number_source_id" property="numberSourceId"/>
+        <result column="user_id" property="userId"/>
+        <result column="patient_name" property="patientName"/>
+        <result column="patient_id_card" property="patientIdCard"/>
+        <result column="fee" property="fee"/>
+        <result column="status" property="status"/>
+        <result column="appointment_time" property="appointmentTime"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, number_source_id, user_id, patient_name, patient_id_card, fee, status, appointment_time, pay_time, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM appointment
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByDoctorId" resultMap="BaseResultMap">
+        SELECT a.*, u.phone as user_phone
+        FROM appointment a
+        LEFT JOIN number_source ns ON a.number_source_id = ns.id
+        LEFT JOIN schedule s ON ns.schedule_id = s.id
+        LEFT JOIN user u ON a.user_id = u.id
+        WHERE s.doctor_id = #{doctorId}
+        ORDER BY a.appointment_time DESC
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM appointment
+        WHERE user_id = #{userId}
+        ORDER BY appointment_time DESC
+    </select>
+
+    <select id="selectByNumberSourceId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM appointment
+        WHERE number_source_id = #{numberSourceId}
+        ORDER BY appointment_time DESC
+    </select>
+
+    <select id="selectValidByNumberSourceId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM appointment
+        WHERE number_source_id = #{numberSourceId} AND status != 4
+        ORDER BY appointment_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM appointment
+        ORDER BY appointment_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.Appointment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO appointment (number_source_id, user_id, patient_name, patient_id_card, fee, status, appointment_time)
+        VALUES (#{numberSourceId}, #{userId}, #{patientName}, #{patientIdCard}, #{fee}, #{status}, NOW())
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.Appointment">
+        UPDATE appointment
+        SET status = #{status}, pay_time = #{payTime}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM appointment WHERE id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.ScheduleMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.Schedule">
+        <id column="id" property="id"/>
+        <result column="doctor_id" property="doctorId"/>
+        <result column="visit_date" property="visitDate"/>
+        <result column="visit_time" property="visitTime"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, doctor_id, visit_date, visit_time, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM schedule
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByDoctorId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM schedule
+        WHERE doctor_id = #{doctorId}
+        ORDER BY visit_date DESC
+    </select>
+
+    <select id="selectByDoctorIdAndDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM schedule
+        WHERE doctor_id = #{doctorId} AND visit_date = #{visitDate}
+        ORDER BY visit_time
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM schedule
+        ORDER BY visit_date DESC
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.Schedule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO schedule (doctor_id, visit_date, visit_time, status, create_time)
+        VALUES (#{doctorId}, #{visitDate}, #{visitTime}, #{status}, NOW())
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.Schedule">
+        UPDATE schedule
+        SET visit_date = #{visitDate}, visit_time = #{visitTime}, status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM schedule WHERE id = #{id}
+    </delete>
+</mapper>

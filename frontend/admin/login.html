@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗预约系统 - 管理员登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🏥 医疗预约系统</h1>
+            <p>管理员登录</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="adminAccount">账号</label>
+                <input type="text" id="adminAccount" name="adminAccount" placeholder="请输入管理员账号" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pwd">密码</label>
+                <input type="password" id="pwd" name="pwd" placeholder="请输入密码" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">登录</button>
+            
+            <div class="error-message" id="errorMsg"></div>
+            <div class="success-message" id="successMsg"></div>
+        </form>
+    </div>
+
+    <script>
+        // API基础地址
+        const API_BASE_URL = 'http://localhost:8083';
+        
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const adminAccount = document.getElementById('adminAccount').value.trim();
+            const pwd = document.getElementById('pwd').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            
+            // 隐藏之前的消息
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // 验证输入
+            if (!adminAccount || !pwd) {
+                errorMsg.textContent = '请输入账号和密码';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // 禁用登录按钮
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        adminAccount: adminAccount,
+                        pwd: pwd
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    // 登录成功
+                    successMsg.textContent = '登录成功，正在跳转...';
+                    successMsg.style.display = 'block';
+                    
+                    // 保存token和用户信息到本地存储
+                    localStorage.setItem('adminToken', data.data.token);
+                    localStorage.setItem('adminInfo', JSON.stringify(data.data.adminInfo));
+                    
+                    // 跳转到主页面
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // 登录失败
+                    errorMsg.textContent = data.msg || '登录失败';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                errorMsg.textContent = '网络错误，请检查后端服务是否启动';
+                errorMsg.style.display = 'block';
+            } finally {
+                // 恢复登录按钮
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+    </script>
+</body>
+</html>

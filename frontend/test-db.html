@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库连接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #e9ecef;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 数据库连接测试</h1>
+        
+        <div id="status" class="status info">
+            点击下方按钮开始测试...
+        </div>
+        
+        <div class="section">
+            <h3>测试操作</h3>
+            <button onclick="testConnection()">测试数据库连接</button>
+            <button onclick="testTables()">检查表结构</button>
+            <button onclick="showSQL()">显示SQL脚本</button>
+        </div>
+        
+        <div id="result" class="section" style="display: none;">
+            <h3>测试结果</h3>
+            <pre id="resultContent"></pre>
+        </div>
+        
+        <div id="sqlSection" class="section" style="display: none;">
+            <h3>SQL脚本</h3>
+            <p>请在MySQL中执行以下脚本来创建数据库和表：</p>
+            <pre id="sqlContent"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8083';
+        
+        async function testConnection() {
+            const statusEl = document.getElementById('status');
+            const resultEl = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            statusEl.textContent = '正在测试数据库连接...';
+            statusEl.className = 'status info';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/db`);
+                const data = await response.json();
+                
+                resultEl.style.display = 'block';
+                resultContent.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.code === 200 && data.data.dbStatus === 'connected') {
+                    statusEl.textContent = '✅ 数据库连接成功！';
+                    statusEl.className = 'status success';
+                } else {
+                    statusEl.textContent = '❌ 数据库连接失败：' + (data.data.error || '未知错误');
+                    statusEl.className = 'status error';
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ 连接失败：' + error.message;
+                statusEl.className = 'status error';
+                resultEl.style.display = 'block';
+                resultContent.textContent = error.message;
+            }
+        }
+        
+        async function testTables() {
+            const statusEl = document.getElementById('status');
+            const resultEl = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            statusEl.textContent = '正在检查表结构...';
+            statusEl.className = 'status info';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/db`);
+                const data = await response.json();
+                
+                resultEl.style.display = 'block';
+                
+                if (data.code === 200) {
+                    const tableInfo = `
+数据库状态: ${data.data.dbStatus}
+管理员数量: ${data.data.admin ? 1 : 0}
+科室数量: ${data.data.deptCount || 0}
+医生数量: ${data.data.doctorCount || 0}
+用户数量: ${data.data.userCount || 0}
+
+科室列表:
+${data.data.depts ? data.data.depts.map(d => `  - ${d.deptName} (ID: ${d.id})`).join('\n') : '无'}
+
+医生列表:
+${data.data.doctors ? data.data.doctors.map(d => `  - ${d.name} (${d.workNo})`).join('\n') : '无'}
+
+用户列表:
+${data.data.users ? data.data.users.map(u => `  - ${u.realName} (${u.phone})`).join('\n') : '无'}
+                    `;
+                    resultContent.textContent = tableInfo;
+                    
+                    if (data.data.deptCount > 0) {
+                        statusEl.textContent = '✅ 表结构正常，数据已加载';
+                        statusEl.className = 'status success';
+                    } else {
+                        statusEl.textContent = '⚠️ 表已创建但没有数据，请检查SQL脚本是否执行';
+                        statusEl.className = 'status info';
+                    }
+                } else {
+                    statusEl.textContent = '❌ 检查失败';
+                    statusEl.className = 'status error';
+                    resultContent.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ 检查失败：' + error.message;
+                statusEl.className = 'status error';
+                resultEl.style.display = 'block';
+                resultContent.textContent = error.message;
+            }
+        }
+        
+        function showSQL() {
+            const sqlSection = document.getElementById('sqlSection');
+            const sqlContent = document.getElementById('sqlContent');
+            
+            sqlContent.textContent = `-- 在MySQL中执行以下命令：
+
+1. 创建数据库和表：
+   打开文件: c:\\java\\Appointment_Registration_System\\database.sql
+   在MySQL客户端中执行整个文件
+
+2. 或者分步执行：
+   mysql -u root -p hospital_registration_system < database.sql
+
+3. 或者在IDEA中：
+   - 右键点击 database.sql 文件
+   - 选择 "Run SQL Script" 或 "Execute SQL Script"
+   
+4. 验证表是否创建成功：
+   USE hospital_registration_system;
+   SHOW TABLES;
+   
+5. 查看表数据：
+   SELECT * FROM admin;
+   SELECT * FROM dept;
+   SELECT * FROM doctor;
+   SELECT * FROM user;
+   SELECT * FROM operate_log;
+`;
+            
+            sqlSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+/* pages/booking/booking.wxss */
+.page-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 120rpx;
+}
+
+/* 步骤指示器 */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 20rpx;
+  background: #fff;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-number {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.step.active .step-number {
+  background: #667eea;
+  color: #fff;
+}
+
+.step-text {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.step.active .step-text {
+  color: #667eea;
+}
+
+.step-line {
+  width: 60rpx;
+  height: 2rpx;
+  background: #e0e0e0;
+  margin: 0 10rpx;
+  margin-bottom: 30rpx;
+}
+
+.step-line.active {
+  background: #667eea;
+}
+
+/* 步骤内容 */
+.step-content {
+  padding: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #667eea;
+}
+
+/* 科室列表 */
+.dept-list {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.dept-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: #fff;
+}
+
+.dept-item:last-child {
+  border-bottom: none;
+}
+
+.dept-item.selected {
+  background: #f0f4ff;
+}
+
+.dept-info {
+  flex: 1;
+}
+
+.dept-name-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.dept-desc-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.dept-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+}
+
+/* 日期列表 */
+.date-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.date-card {
+  width: calc(25% - 15rpx);
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 10rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+  border: 2rpx solid transparent;
+}
+
+.date-card.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.date-week {
+  font-size: 24rpx;
+  color: #667eea;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.date-day {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.date-full {
+  font-size: 20rpx;
+  color: #999;
+}
+
+/* 医生列表 */
+.doctor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.doctor-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+  border: 2rpx solid transparent;
+  position: relative;
+}
+
+.doctor-card.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.doctor-avatar-large {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #e3f2fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50rpx;
+  margin-right: 24rpx;
+}
+
+.doctor-info-large {
+  flex: 1;
+}
+
+.doctor-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.doctor-name-large {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.doctor-title {
+  font-size: 24rpx;
+  color: #667eea;
+  background: #f0f4ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.doctor-specialty {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.doctor-tags {
+  display: flex;
+  gap: 12rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #4caf50;
+  background: #e8f5e9;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.tag-empty {
+  color: #999;
+  background: #f5f5f5;
+}
+
+.select-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #667eea;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+/* 排班信息 */
+.schedule-info {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.info-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 时间段列表 */
+.time-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.time-slot-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+  border: 2rpx solid transparent;
+  position: relative;
+}
+
+.time-slot-card.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.time-slot-card.disabled {
+  opacity: 0.5;
+  background: #f5f5f5;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-range {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.time-price {
+  font-size: 28rpx;
+  color: #ff6b6b;
+}
+
+.remain-num {
+  font-size: 26rpx;
+  color: #4caf50;
+}
+
+.remain-num.empty {
+  color: #999;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 40rpx;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 20rpx 30rpx;
+  display: flex;
+  gap: 20rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.bottom-bar .btn {
+  flex: 1;
+}
+
+.bottom-bar .btn-default {
+  background: #f5f5f5;
+  color: #666;
+}

@@ -1,0 +1,102 @@
+<!--pages/schedule/schedule.wxml-->
+<view class="page-container">
+  <!-- 医生信息 -->
+  <view class="doctor-card">
+    <view class="doctor-avatar">
+      <text class="avatar-text">👨‍⚕️</text>
+    </view>
+    <view class="doctor-info">
+      <view class="doctor-name-row">
+        <text class="doctor-name">{{doctor.name}}</text>
+        <text class="doctor-title">{{doctor.title}}</text>
+      </view>
+      <view class="doctor-dept">
+        <text class="dept-tag">{{doctor.deptName}}</text>
+      </view>
+      <view class="doctor-intro">
+        <text class="intro-text">{{doctor.intro || '暂无简介'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 号源列表 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">可预约号源</text>
+    </view>
+
+    <view class="source-list" wx:if="{{numberSourceList.length > 0}}">
+      <view class="source-card" wx:for="{{numberSourceList}}" wx:key="id" bindtap="selectSource" data-item="{{item}}">
+        <view class="source-date">
+          <text class="date-text">{{item.visitDate}}</text>
+          <text class="time-text">{{item.visitTime}}</text>
+        </view>
+        <view class="source-info">
+          <view class="source-remain">
+            <text class="remain-label">剩余</text>
+            <text class="remain-num {{item.remainNum <= 0 ? 'empty' : ''}}">{{item.remainNum}}</text>
+            <text class="remain-label">号</text>
+          </view>
+          <view class="source-fee">
+            <text class="fee-text">¥0.01</text>
+          </view>
+        </view>
+        <view class="source-action">
+          <button class="btn-select {{item.remainNum <= 0 ? 'disabled' : ''}}" size="mini">
+            {{item.remainNum <= 0 ? '已约满' : '预约'}}
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{numberSourceList.length === 0}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无可预约号源</text>
+    </view>
+  </view>
+</view>
+
+<!-- 预约弹窗 -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal"></view>
+<view class="modal-container" wx:if="{{showModal}}">
+  <view class="modal-header">
+    <text class="modal-title">预约挂号</text>
+    <text class="modal-close" bindtap="hideModal">×</text>
+  </view>
+  <view class="modal-body">
+    <view class="modal-info">
+      <view class="info-row">
+        <text class="info-label">就诊医生：</text>
+        <text class="info-value">{{doctor.name}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">就诊日期：</text>
+        <text class="info-value">{{selectedSource.visitDate}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">就诊时段：</text>
+        <text class="info-value">{{selectedSource.visitTime}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">挂号费用：</text>
+        <text class="info-value fee">¥0.01</text>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label">患者姓名</text>
+        <input class="form-input" value="{{patientName}}" placeholder="请输入患者真实姓名" bindinput="onPatientNameInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">身份证号</text>
+        <input class="form-input" value="{{patientIdCard}}" placeholder="请输入患者身份证号" bindinput="onPatientIdCardInput" />
+      </view>
+    </view>
+  </view>
+  <view class="modal-footer">
+    <button class="btn btn-cancel" bindtap="hideModal">取消</button>
+    <button class="btn btn-confirm" bindtap="confirmAppointment">确认预约</button>
+  </view>
+</view>

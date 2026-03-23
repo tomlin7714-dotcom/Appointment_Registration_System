@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.NumberSourceMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.NumberSource">
+        <id column="id" property="id"/>
+        <result column="schedule_id" property="scheduleId"/>
+        <result column="total_num" property="totalNum"/>
+        <result column="remain_num" property="remainNum"/>
+        <result column="fee" property="fee"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, schedule_id, total_num, remain_num, fee, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM number_source
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByDoctorId" resultMap="BaseResultMap">
+        SELECT ns.*, s.doctor_id, s.visit_date, s.visit_time
+        FROM number_source ns
+        LEFT JOIN schedule s ON ns.schedule_id = s.id
+        WHERE s.doctor_id = #{doctorId}
+        ORDER BY ns.create_time DESC
+    </select>
+
+    <select id="selectByScheduleId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM number_source
+        WHERE schedule_id = #{scheduleId}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM number_source
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.NumberSource" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO number_source (schedule_id, total_num, remain_num, fee, status, create_time)
+        VALUES (#{scheduleId}, #{totalNum}, #{remainNum}, #{fee}, #{status}, NOW())
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.NumberSource">
+        UPDATE number_source
+        SET total_num = #{totalNum}, remain_num = #{remainNum}, fee = #{fee}, status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM number_source WHERE id = #{id}
+    </delete>
+</mapper>

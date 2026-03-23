@@ -1,0 +1,42 @@
+<!--pages/doctor/doctor.wxml-->
+<view class="page-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">{{deptName || '医生列表'}}</text>
+    <text class="page-subtitle">共 {{doctorList.length}} 位医生</text>
+  </view>
+
+  <!-- 医生列表 -->
+  <view class="doctor-list">
+    <view class="doctor-card" wx:for="{{doctorList}}" wx:key="id" bindtap="selectDoctor" data-id="{{item.id}}">
+      <view class="doctor-avatar">
+        <text class="avatar-text">👨‍⚕️</text>
+      </view>
+      <view class="doctor-info">
+        <view class="doctor-name-row">
+          <text class="doctor-name">{{item.name}}</text>
+          <text class="doctor-title">{{item.title}}</text>
+        </view>
+        <view class="doctor-dept">
+          <text class="dept-tag">{{item.deptName}}</text>
+        </view>
+        <view class="doctor-intro">
+          <text class="intro-text">{{item.intro || '暂无简介'}}</text>
+        </view>
+        <view class="doctor-specialty">
+          <text class="specialty-label">擅长：</text>
+          <text class="specialty-text">{{item.specialty || '暂无'}}</text>
+        </view>
+      </view>
+      <view class="doctor-action">
+        <button class="btn-appointment" size="mini" type="primary">预约</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{doctorList.length === 0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无医生信息</text>
+  </view>
+</view>

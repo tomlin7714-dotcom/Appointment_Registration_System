@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appointment.mapper.DoctorMapper">
+    <resultMap id="BaseResultMap" type="com.appointment.entity.Doctor">
+        <id column="id" property="id"/>
+        <result column="work_no" property="workNo"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="title" property="title"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="phone" property="phone"/>
+        <result column="intro" property="intro"/>
+        <result column="specialty" property="specialty"/>
+        <result column="pwd" property="pwd"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, work_no, name, gender, title, dept_id, phone, intro, specialty, pwd, create_time, update_time, status
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM doctor
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByWorkNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM doctor
+        WHERE work_no = #{workNo}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM doctor
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectByDeptId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM doctor
+        WHERE dept_id = #{deptId}
+        ORDER BY id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.appointment.entity.Doctor">
+        INSERT INTO doctor (work_no, name, gender, title, dept_id, phone, intro, specialty, pwd, create_time, status)
+        VALUES (#{workNo}, #{name}, #{gender}, #{title}, #{deptId}, #{phone}, #{intro}, #{specialty}, #{pwd}, NOW(), #{status})
+    </insert>
+
+    <update id="update" parameterType="com.appointment.entity.Doctor">
+        UPDATE doctor
+        SET name = #{name}, gender = #{gender}, title = #{title}, dept_id = #{deptId}, 
+            phone = #{phone}, intro = #{intro}, specialty = #{specialty}, status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM doctor WHERE id = #{id}
+    </delete>
+
+    <update id="updateLastLoginTime">
+        UPDATE doctor
+        SET update_time = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,138 @@
+<!--pages/booking/booking.wxml-->
+<view class="page-container">
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step {{currentStep >= 1 ? 'active' : ''}}">
+      <view class="step-number">1</view>
+      <text class="step-text">选择科室</text>
+    </view>
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+    <view class="step {{currentStep >= 2 ? 'active' : ''}}">
+      <view class="step-number">2</view>
+      <text class="step-text">选择日期</text>
+    </view>
+    <view class="step-line {{currentStep >= 3 ? 'active' : ''}}"></view>
+    <view class="step {{currentStep >= 3 ? 'active' : ''}}">
+      <view class="step-number">3</view>
+      <text class="step-text">选择医生</text>
+    </view>
+    <view class="step-line {{currentStep >= 4 ? 'active' : ''}}"></view>
+    <view class="step {{currentStep >= 4 ? 'active' : ''}}">
+      <view class="step-number">4</view>
+      <text class="step-text">确认预约</text>
+    </view>
+  </view>
+
+  <!-- 步骤1：选择科室 -->
+  <view wx:if="{{currentStep === 1}}" class="step-content">
+    <view class="section-title">请选择科室</view>
+    <view class="dept-list">
+      <view class="dept-item {{selectedDeptId === item.id ? 'selected' : ''}}" 
+            wx:for="{{deptList}}" 
+            wx:key="id" 
+            bindtap="selectDept" 
+            data-id="{{item.id}}"
+            data-name="{{item.deptName}}">
+        <view class="dept-info">
+          <text class="dept-name-text">{{item.deptName}}</text>
+          <text class="dept-desc-text">{{item.deptDesc || '专业诊疗服务'}}</text>
+        </view>
+        <view class="dept-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤2：选择日期 -->
+  <view wx:if="{{currentStep === 2}}" class="step-content">
+    <view class="section-title">{{selectedDeptName}} - 选择就诊日期</view>
+    <view class="date-list">
+      <view class="date-card {{selectedDate === item.date ? 'selected' : ''}}" 
+            wx:for="{{dateList}}" 
+            wx:key="date" 
+            bindtap="selectDate" 
+            data-date="{{item.date}}">
+        <text class="date-week">{{item.week}}</text>
+        <text class="date-day">{{item.day}}</text>
+        <text class="date-full">{{item.date}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤3：选择医生 -->
+  <view wx:if="{{currentStep === 3}}" class="step-content">
+    <view class="section-title">{{selectedDeptName}} {{selectedDate}} - 选择医生</view>
+    <view class="doctor-list">
+      <view class="doctor-card {{selectedDoctorId === item.id ? 'selected' : ''}}" 
+            wx:for="{{doctorList}}" 
+            wx:key="id" 
+            bindtap="selectDoctor" 
+            data-id="{{item.id}}"
+            data-name="{{item.name}}">
+        <view class="doctor-avatar-large">👨‍⚕️</view>
+        <view class="doctor-info-large">
+          <view class="doctor-name-row">
+            <text class="doctor-name-large">{{item.name}}</text>
+            <text class="doctor-title">{{item.title}}</text>
+          </view>
+          <text class="doctor-specialty">{{item.specialty || '擅长各类常见病诊治'}}</text>
+          <view class="doctor-tags">
+            <text class="tag" wx:if="{{item.hasSchedule}}">有号源</text>
+            <text class="tag tag-empty" wx:else>暂无号源</text>
+          </view>
+        </view>
+        <view class="select-icon" wx:if="{{selectedDoctorId === item.id}}">✓</view>
+      </view>
+    </view>
+    <view class="empty-state" wx:if="{{doctorList.length === 0}}">
+      <text class="empty-icon">😔</text>
+      <text class="empty-text">该日期暂无医生排班</text>
+      <button class="btn btn-primary" bindtap="goBackToDate">选择其他日期</button>
+    </view>
+  </view>
+
+  <!-- 步骤4：选择号源 -->
+  <view wx:if="{{currentStep === 4}}" class="step-content">
+    <view class="section-title">{{selectedDoctorName}} - 选择时间段</view>
+    <view class="schedule-info">
+      <text class="info-text">📅 {{selectedDate}}</text>
+      <text class="info-text">🏥 {{selectedDeptName}}</text>
+    </view>
+    <view class="time-slot-list">
+      <view class="time-slot-card {{selectedScheduleId === item.id ? 'selected' : ''}} {{item.remainNum === 0 ? 'disabled' : ''}}" 
+            wx:for="{{scheduleList}}" 
+            wx:key="id" 
+            bindtap="selectSchedule" 
+            data-id="{{item.id}}"
+            data-time="{{item.visitTime}}"
+            data-nsid="{{item.numberSourceId}}"
+            data-fee="{{item.fee}}">
+        <view class="time-info">
+          <text class="time-range">{{item.visitTime}}</text>
+          <text class="time-price">¥{{item.fee || 0.01}}</text>
+        </view>
+        <view class="slot-info">
+          <text class="remain-num {{item.remainNum === 0 ? 'empty' : ''}}">
+            {{item.remainNum === 0 ? '已约满' : '剩余' + item.remainNum + '个号'}}
+          </text>
+        </view>
+        <view class="select-icon" wx:if="{{selectedScheduleId === item.id}}">✓</view>
+      </view>
+    </view>
+    <view class="empty-state" wx:if="{{scheduleList.length === 0}}">
+      <text class="empty-icon">😔</text>
+      <text class="empty-text">该医生今日暂无号源</text>
+      <button class="btn btn-primary" bindtap="goBackToDoctor">选择其他医生</button>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{currentStep < 4 || scheduleList.length > 0}}">
+    <button class="btn btn-default" wx:if="{{currentStep > 1}}" bindtap="goBack">上一步</button>
+    <button class="btn btn-default" wx:else bindtap="cancelBooking">取消</button>
+    
+    <button class="btn btn-primary" 
+            bindtap="goNext">
+      {{currentStep === 4 ? '确认预约' : '下一步'}}
+    </button>
+  </view>
+</view>
