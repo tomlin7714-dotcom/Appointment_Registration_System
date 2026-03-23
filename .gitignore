@@ -1,10 +1,15 @@
-### IntelliJ IDEA ###
+# ===================== 通用 IDE 配置 =====================
+# IntelliJ IDEA
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .kotlin
+.idea/
+*.iml
+*.iws
+*.ipr
 
-### Eclipse ###
+# Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -16,17 +21,40 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# VS Code
 .vscode/
 
-### Mac OS ###
+# ===================== 系统/项目配置 =====================
+# Mac OS 系统文件
 .DS_Store
-# 项目排除路径
+
+# Maven/Gradle 编译产物（合并重复的 target 配置）
 /target/
+classes/
+
+# 日志与临时文件（补充常用项）
+*.log
+*.log.*
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# 本地配置文件（避免上传敏感信息）
+application-local.yml
+application-dev.yml
+*.properties.local
+
+# 前端相关（如果有前端代码可保留）
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
