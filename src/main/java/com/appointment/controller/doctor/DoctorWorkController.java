@@ -848,6 +848,93 @@ public class DoctorWorkController {
         return ResponseVo.success();
     }
 
+    @GetMapping("/consultation/get")
+    public ResponseVo getConsultation(@RequestParam Integer appointmentId) {
+        if (appointmentId == null) {
+            return ResponseVo.error(400, "预约ID不能为空");
+        }
+
+        Appointment appointment = appointmentMapper.selectById(appointmentId);
+        if (appointment == null) {
+            return ResponseVo.error(404, "预约不存在");
+        }
+
+        // 获取关联信息
+        Map<String, Object> data = new HashMap<>();
+        data.put("appointmentId", appointment.getId());
+        data.put("patientName", appointment.getPatientName());
+        data.put("patientIdCard", appointment.getPatientIdCard());
+        data.put("consultationType", appointment.getConsultationType());
+        data.put("chiefComplaint", appointment.getChiefComplaint());
+        data.put("medicalHistory", appointment.getMedicalHistory());
+        data.put("recoveryHistory", appointment.getRecoveryHistory());
+        data.put("diagnosis", appointment.getDiagnosis());
+        data.put("treatment", appointment.getTreatment());
+        data.put("doctorAdvice", appointment.getDoctorAdvice());
+        data.put("status", appointment.getStatus());
+
+        // 患者信息
+        User user = userMapper.selectById(appointment.getUserId());
+        if (user != null) {
+            data.put("patientPhone", user.getPhone());
+        }
+
+        // 就诊信息
+        NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
+        if (source != null) {
+            Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
+            if (schedule != null) {
+                data.put("visitDate", schedule.getVisitDate());
+                data.put("visitTime", schedule.getVisitTime());
+
+                Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
+                if (doctor != null) {
+                    data.put("doctorName", doctor.getName());
+                    data.put("doctorTitle", doctor.getTitle());
+                    Dept dept = deptMapper.selectById(doctor.getDeptId());
+                    if (dept != null) {
+                        data.put("deptName", dept.getDeptName());
+                        data.put("area", dept.getArea());
+                        data.put("roomNumber", dept.getRoomNumber());
+                    }
+                }
+            }
+        }
+
+        return ResponseVo.success(data);
+    }
+
+    @PostMapping("/consultation/save")
+    public ResponseVo saveConsultation(@RequestBody Map<String, Object> params) {
+        Integer appointmentId = parseInteger(params.get("appointmentId"));
+        String diagnosis = (String) params.get("diagnosis");
+        String treatment = (String) params.get("treatment");
+        String doctorAdvice = (String) params.get("doctorAdvice");
+
+        if (appointmentId == null) {
+            return ResponseVo.error(400, "预约ID不能为空");
+        }
+
+        Appointment appointment = appointmentMapper.selectById(appointmentId);
+        if (appointment == null) {
+            return ResponseVo.error(404, "预约不存在");
+        }
+
+        // 保存医生诊断信息
+        appointment.setDiagnosis(diagnosis);
+        appointment.setTreatment(treatment);
+        appointment.setDoctorAdvice(doctorAdvice);
+        // 更新状态为已完成
+        appointment.setStatus(3);
+        appointmentMapper.update(appointment);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("appointmentId", appointmentId);
+        result.put("status", appointment.getStatus());
+
+        return ResponseVo.success(result);
+    }
+
     private Integer parseInteger(Object obj) {
         if (obj == null) return null;
         if (obj instanceof Integer) return (Integer) obj;

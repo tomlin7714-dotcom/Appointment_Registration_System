@@ -68,6 +68,7 @@
             <button class="btn btn-primary" bindtap="payAppointment" data-id="{{item.id}}">立即支付</button>
           </block>
           <block wx:if="{{item.status === 1}}">
+            <button class="btn btn-default" bindtap="cancelAppointment" data-id="{{item.id}}">取消预约</button>
             <text class="waiting-text">等待叫号中...</text>
           </block>
           <block wx:if="{{item.status === 2}}">

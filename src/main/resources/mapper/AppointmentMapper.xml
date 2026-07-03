@@ -7,6 +7,13 @@
         <result column="user_id" property="userId"/>
         <result column="patient_name" property="patientName"/>
         <result column="patient_id_card" property="patientIdCard"/>
+        <result column="consultation_type" property="consultationType"/>
+        <result column="chief_complaint" property="chiefComplaint"/>
+        <result column="medical_history" property="medicalHistory"/>
+        <result column="recovery_history" property="recoveryHistory"/>
+        <result column="diagnosis" property="diagnosis"/>
+        <result column="treatment" property="treatment"/>
+        <result column="doctor_advice" property="doctorAdvice"/>
         <result column="fee" property="fee"/>
         <result column="status" property="status"/>
         <result column="appointment_time" property="appointmentTime"/>
@@ -16,7 +23,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, number_source_id, user_id, patient_name, patient_id_card, fee, status, appointment_time, pay_time, create_time, update_time
+        id, number_source_id, user_id, patient_name, patient_id_card, consultation_type, chief_complaint, medical_history, recovery_history, diagnosis, treatment, doctor_advice, fee, status, appointment_time, pay_time, create_time, update_time
     </sql>
 
     <select id="selectById" resultMap="BaseResultMap">
@@ -63,13 +70,22 @@
     </select>
 
     <insert id="insert" parameterType="com.appointment.entity.Appointment" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO appointment (number_source_id, user_id, patient_name, patient_id_card, fee, status, appointment_time)
-        VALUES (#{numberSourceId}, #{userId}, #{patientName}, #{patientIdCard}, #{fee}, #{status}, NOW())
+        INSERT INTO appointment (number_source_id, user_id, patient_name, patient_id_card, consultation_type, chief_complaint, medical_history, recovery_history, fee, status, appointment_time)
+        VALUES (#{numberSourceId}, #{userId}, #{patientName}, #{patientIdCard}, #{consultationType}, #{chiefComplaint}, #{medicalHistory}, #{recoveryHistory}, #{fee}, #{status}, NOW())
     </insert>
 
     <update id="update" parameterType="com.appointment.entity.Appointment">
         UPDATE appointment
-        SET status = #{status}, pay_time = #{payTime}, update_time = NOW()
+        SET status = #{status},
+            pay_time = #{payTime},
+            consultation_type = #{consultationType},
+            chief_complaint = #{chiefComplaint},
+            medical_history = #{medicalHistory},
+            recovery_history = #{recoveryHistory},
+            diagnosis = #{diagnosis},
+            treatment = #{treatment},
+            doctor_advice = #{doctorAdvice},
+            update_time = NOW()
         WHERE id = #{id}
     </update>
 
