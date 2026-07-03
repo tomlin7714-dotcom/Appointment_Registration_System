@@ -7,7 +7,7 @@ public class NumberSource {
     private Integer scheduleId;
     private Integer totalNum;
     private Integer remainNum;
-    private Integer fee;
+    private Double fee;
     private Integer status;
     private Date createTime;
     private Date updateTime;
@@ -44,11 +44,11 @@ public class NumberSource {
         this.remainNum = remainNum;
     }
 
-    public Integer getFee() {
+    public Double getFee() {
         return fee;
     }
 
-    public void setFee(Integer fee) {
+    public void setFee(Double fee) {
         this.fee = fee;
     }
 

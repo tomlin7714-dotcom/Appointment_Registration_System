@@ -194,6 +194,54 @@
             background: #f8f9fa;
         }
         
+        .table-container {
+            height: 486px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .table-container .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .pagination-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 40px;
+            padding: 10px 0;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .pagination-buttons button {
+            min-width: 36px;
+            height: 36px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .pagination-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         /* 表单样式 */
         .form-group {
             margin-bottom: 20px;
@@ -598,35 +646,33 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">号源列表</span>
-                        <button class="btn btn-primary" onclick="openNumberSourceModal()">+ 发布号源</button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="date" id="numberSourceDate" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                            <button class="btn btn-primary" onclick="loadNumberSourceList()" style="padding: 8px 16px;">查询</button>
+                            <button class="btn btn-primary" onclick="openNumberSourceModal()">+ 发布号源</button>
+                        </div>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>时间段</th>
-                                <th>总号数</th>
-                                <th>已预约</th>
-                                <th>剩余</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="numberSourceBody">
-                            <tr>
-                                <td>2024-01-20</td>
-                                <td>09:00-09:30</td>
-                                <td>5</td>
-                                <td>3</td>
-                                <td>2</td>
-                                <td>可预约</td>
-                                <td>
-                                    <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">编辑</button>
-                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">关闭</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>时间段</th>
+                                    <th>总号数</th>
+                                    <th>已预约</th>
+                                    <th>剩余</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="numberSourceBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="numberSourcePaginationInfo"></div>
+                        <div class="pagination-buttons" id="numberSourcePagination"></div>
+                    </div>
                 </div>
             </div>
 
@@ -638,33 +684,39 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">全部预约</span>
-                        <div>
-                            <input type="date" id="filterDate" style="padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-                            <select id="filterStatus" style="padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; margin-left: 10px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="appointmentSearch" placeholder="搜索患者姓名或手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 180px;">
+                            <input type="date" id="filterDate" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                            <select id="filterStatus" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
                                 <option value="">全部状态</option>
                                 <option value="1">待就诊</option>
                                 <option value="3">已完成</option>
                                 <option value="4">已取消</option>
                             </select>
-                            <button class="btn btn-primary" style="margin-left: 10px;" onclick="filterAppointments()">筛选</button>
+                            <button class="btn btn-primary" onclick="filterAppointments()" style="padding: 8px 16px;">筛选</button>
                         </div>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>预约号</th>
-                                <th>患者姓名</th>
-                                <th>手机号</th>
-                                <th>预约日期</th>
-                                <th>时间段</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appointmentBody">
-                            <!-- 动态加载 -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>预约号</th>
+                                    <th>患者姓名</th>
+                                    <th>手机号</th>
+                                    <th>预约日期</th>
+                                    <th>时间段</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="appointmentPaginationInfo"></div>
+                        <div class="pagination-buttons" id="appointmentPagination"></div>
+                    </div>
                 </div>
             </div>
 
@@ -680,6 +732,8 @@
                     <div class="current-info">
                         <div>患者姓名：<span id="currentPatient">-</span></div>
                         <div>联系电话：<span id="currentPatientPhone">-</span></div>
+                        <div>就诊科室：<span id="currentDept">-</span></div>
+                        <div>就诊地点：<span id="currentLocation">-</span></div>
                     </div>
                     <div class="waiting-count">等待人数：<span id="waitingNumber">0</span> 人</div>
                     <div class="call-buttons">
@@ -837,6 +891,12 @@
         // API基础地址
         const API_BASE_URL = 'http://localhost:8083';
         
+        // 分页参数
+        let numberSourcePage = 1;
+        let numberSourcePageSize = 10;
+        let appointmentPage = 1;
+        let appointmentPageSize = 10;
+        
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('doctorToken');
@@ -875,6 +935,112 @@
             localStorage.removeItem('doctorToken');
             localStorage.removeItem('doctorInfo');
             window.location.href = 'login.html';
+        }
+        
+        // 渲染分页控件
+        function renderPagination(type, total, currentPage, pageSize) {
+            const paginationDiv = document.getElementById(`${type}Pagination`);
+            const infoDiv = document.getElementById(`${type}PaginationInfo`);
+            
+            if (!paginationDiv || !infoDiv) return;
+            
+            const totalPages = Math.ceil(total / pageSize);
+            
+            infoDiv.textContent = `共 ${total} 条记录，第 ${currentPage}/${totalPages} 页`;
+            
+            paginationDiv.innerHTML = '';
+            
+            const prevBtn = document.createElement('button');
+            prevBtn.style.background = '#f0f0f0';
+            prevBtn.textContent = '上一页';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = function() {
+                if (type === 'numberSource') {
+                    numberSourcePage = currentPage - 1;
+                    loadNumberSourceList();
+                } else {
+                    appointmentPage = currentPage - 1;
+                    loadAppointmentList();
+                }
+            };
+            paginationDiv.appendChild(prevBtn);
+            
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.style.background = i === currentPage ? '#667eea' : '#f0f0f0';
+                pageBtn.style.color = i === currentPage ? 'white' : 'black';
+                pageBtn.textContent = i;
+                pageBtn.onclick = function() {
+                    if (type === 'numberSource') {
+                        numberSourcePage = i;
+                        loadNumberSourceList();
+                    } else {
+                        appointmentPage = i;
+                        loadAppointmentList();
+                    }
+                };
+                paginationDiv.appendChild(pageBtn);
+            }
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.style.background = '#f0f0f0';
+            nextBtn.textContent = '下一页';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = function() {
+                if (type === 'numberSource') {
+                    numberSourcePage = currentPage + 1;
+                    loadNumberSourceList();
+                } else {
+                    appointmentPage = currentPage + 1;
+                    loadAppointmentList();
+                }
+            };
+            paginationDiv.appendChild(nextBtn);
+            
+            // 页面跳转
+            const jumpDiv = document.createElement('div');
+            jumpDiv.style.display = 'flex';
+            jumpDiv.style.alignItems = 'center';
+            jumpDiv.style.gap = '5px';
+            jumpDiv.style.marginLeft = '10px';
+            
+            const jumpInput = document.createElement('input');
+            jumpInput.type = 'number';
+            jumpInput.min = '1';
+            jumpInput.max = totalPages;
+            jumpInput.value = currentPage;
+            jumpInput.style.width = '50px';
+            jumpInput.style.height = '32px';
+            jumpInput.style.textAlign = 'center';
+            jumpInput.style.border = '1px solid #e0e0e0';
+            jumpInput.style.borderRadius = '5px';
+            jumpInput.style.padding = '0 5px';
+            
+            const jumpBtn = document.createElement('button');
+            jumpBtn.style.background = '#667eea';
+            jumpBtn.style.color = 'white';
+            jumpBtn.textContent = '跳转';
+            jumpBtn.onclick = function() {
+                let targetPage = parseInt(jumpInput.value);
+                if (targetPage >= 1 && targetPage <= totalPages) {
+                    if (type === 'numberSource') {
+                        numberSourcePage = targetPage;
+                        loadNumberSourceList();
+                    } else {
+                        appointmentPage = targetPage;
+                        loadAppointmentList();
+                    }
+                } else {
+                    alert('请输入有效的页码（1-' + totalPages + '）');
+                }
+            };
+            
+            jumpDiv.appendChild(jumpInput);
+            jumpDiv.appendChild(jumpBtn);
+            paginationDiv.appendChild(jumpDiv);
         }
         
         // 显示消息
@@ -1209,8 +1375,14 @@
         
         function loadNumberSourceList() {
             const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            const dateFilter = document.getElementById('numberSourceDate')?.value || '';
             
-            fetch(`${API_BASE_URL}/api/doctor/numbersource/list?doctorId=${doctorInfo.id}`, {
+            let url = `${API_BASE_URL}/api/doctor/numbersource/list?doctorId=${doctorInfo.id}&page=${numberSourcePage}&pageSize=${numberSourcePageSize}`;
+            if (dateFilter) {
+                url += `&date=${dateFilter}`;
+            }
+            
+            fetch(url, {
                 headers: {
                     'token': localStorage.getItem('doctorToken')
                 }
@@ -1218,7 +1390,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.code === 200) {
-                    renderNumberSourceTable(data.data);
+                    renderNumberSourceTable(data.data.list);
+                    renderPagination('numberSource', data.data.total, data.data.page, data.data.pageSize);
                 }
             })
             .catch(error => {
@@ -1327,10 +1500,12 @@
                     renderTodayAppointments(data.data);
                     
                     // 更新统计数字
+                    const total = data.data.length;
                     const waiting = data.data.filter(a => a.status === 1).length;
-                    const completed = data.data.filter(a => a.status === 2).length;
-                    const cancelled = data.data.filter(a => a.status === 3).length;
+                    const completed = data.data.filter(a => a.status === 3).length;
+                    const cancelled = data.data.filter(a => a.status === 4).length;
                     
+                    document.getElementById('todayAppointment').textContent = total;
                     document.getElementById('waitingCount').textContent = waiting;
                     document.getElementById('completedCount').textContent = completed;
                     document.getElementById('cancelledCount').textContent = cancelled;
@@ -1350,7 +1525,7 @@
             }
             
             appointments.forEach((app, index) => {
-                const statusText = app.status === 0 ? '待支付' : app.status === 1 ? '待就诊' : app.status === 2 ? '已完成' : '已取消';
+                const statusText = app.status === 0 ? '待支付' : app.status === 1 ? '待就诊' : app.status === 2 ? '就诊中' : app.status === 3 ? '已完成' : '已取消';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${index + 1}</td>
@@ -1372,9 +1547,23 @@
         
         async function loadAppointmentList() {
             const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            const keyword = document.getElementById('appointmentSearch')?.value || '';
+            const date = document.getElementById('filterDate')?.value || '';
+            const status = document.getElementById('filterStatus')?.value || '';
+            
+            let url = `${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}&page=${appointmentPage}&pageSize=${appointmentPageSize}`;
+            if (keyword) {
+                url += `&keyword=${encodeURIComponent(keyword)}`;
+            }
+            if (date) {
+                url += `&date=${date}`;
+            }
+            if (status) {
+                url += `&status=${status}`;
+            }
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}`, {
+                const response = await fetch(url, {
                     headers: {
                         'token': localStorage.getItem('doctorToken')
                     }
@@ -1383,7 +1572,8 @@
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    renderAppointmentTable(data.data);
+                    renderAppointmentTable(data.data.list);
+                    renderPagination('appointment', data.data.total, data.data.page, data.data.pageSize);
                 } else {
                     showMessage(data.msg || '加载预约列表失败', 'error');
                 }
@@ -1449,35 +1639,8 @@
         }
         
         function filterAppointments() {
-            const date = document.getElementById('filterDate').value;
-            const status = document.getElementById('filterStatus').value;
-            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
-            
-            let url = `${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}`;
-            if (date) {
-                url += `&date=${date}`;
-            }
-            if (status) {
-                url += `&status=${status}`;
-            }
-            
-            fetch(url, {
-                headers: {
-                    'token': localStorage.getItem('doctorToken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === 200) {
-                    renderAppointmentTable(data.data);
-                } else {
-                    showMessage(data.msg || '筛选失败', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('筛选预约错误:', error);
-                showMessage('网络错误，请稍后重试', 'error');
-            });
+            appointmentPage = 1;
+            loadAppointmentList();
         }
         
         function completeAppointment(id) {
@@ -1580,6 +1743,8 @@
             document.getElementById('currentNumber').textContent = String(currentNum).padStart(3, '0');
             document.getElementById('currentPatient').textContent = currentPatient.patientName;
             document.getElementById('currentPatientPhone').textContent = currentPatient.phone || '-';
+            document.getElementById('currentDept').textContent = currentPatient.deptName || '-';
+            document.getElementById('currentLocation').textContent = currentPatient.area && currentPatient.roomNumber ? `${currentPatient.area}${currentPatient.deptName}${currentPatient.roomNumber}诊室` : '-';
             
             fetch(`${API_BASE_URL}/api/doctor/call/start`, {
                 method: 'POST',
@@ -1597,7 +1762,8 @@
             });
             
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${currentPatient.patientName}患者到诊室就诊`);
+                const location = currentPatient.area && currentPatient.roomNumber ? `${currentPatient.area}${currentPatient.deptName}${currentPatient.roomNumber}诊室` : '诊室';
+                const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${currentPatient.patientName}患者到${location}就诊`);
                 utterance.lang = 'zh-CN';
                 speechSynthesis.speak(utterance);
             }
@@ -1616,11 +1782,14 @@
             if (patientIndex < appointmentList.length) {
                 const patient = appointmentList[patientIndex];
                 document.getElementById('currentPatient').textContent = patient.patientName;
-                document.getElementById('currentPatientPhone').textContent = patient.userPhone || '-';
+                document.getElementById('currentPatientPhone').textContent = patient.phone || '-';
+                document.getElementById('currentDept').textContent = patient.deptName || '-';
+                document.getElementById('currentLocation').textContent = patient.area && patient.roomNumber ? `${patient.area}${patient.deptName}${patient.roomNumber}诊室` : '-';
                 
                 // 播放重叫语音
                 if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${patient.patientName}患者到诊室就诊`);
+                    const location = patient.area && patient.roomNumber ? `${patient.area}${patient.deptName}${patient.roomNumber}诊室` : '诊室';
+                    const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${patient.patientName}患者到${location}就诊`);
                     utterance.lang = 'zh-CN';
                     speechSynthesis.speak(utterance);
                 }

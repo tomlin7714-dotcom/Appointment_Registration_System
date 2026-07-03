@@ -16,4 +16,6 @@ public interface AppointmentMapper {
     int insert(Appointment appointment);
     int update(Appointment appointment);
     int delete(@Param("id") Integer id);
+    int countTodayAppointments(@Param("date") String date);
+    int countAll();
 }

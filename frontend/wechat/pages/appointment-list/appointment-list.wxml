@@ -44,6 +44,10 @@
             <text class="info-value">{{item.visitDate}} {{item.visitTime}}</text>
           </view>
           <view class="info-row">
+            <text class="info-label">就诊地点</text>
+            <text class="info-value">{{item.area}}{{item.deptName}}{{item.roomNumber}}诊室</text>
+          </view>
+          <view class="info-row">
             <text class="info-label">患者姓名</text>
             <text class="info-value">{{item.patientName}}</text>
           </view>

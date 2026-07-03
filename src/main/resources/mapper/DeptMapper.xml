@@ -5,13 +5,15 @@
         <id column="id" property="id"/>
         <result column="dept_name" property="deptName"/>
         <result column="dept_desc" property="deptDesc"/>
+        <result column="area" property="area"/>
+        <result column="room_number" property="roomNumber"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="status" property="status"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, dept_name, dept_desc, create_time, update_time, status
+        id, dept_name, dept_desc, area, room_number, create_time, update_time, status
     </sql>
 
     <select id="selectById" resultMap="BaseResultMap">
@@ -28,13 +30,13 @@
     </select>
 
     <insert id="insert" parameterType="com.appointment.entity.Dept">
-        INSERT INTO dept (dept_name, dept_desc, status)
-        VALUES (#{deptName}, #{deptDesc}, #{status})
+        INSERT INTO dept (dept_name, dept_desc, area, room_number, status)
+        VALUES (#{deptName}, #{deptDesc}, #{area}, #{roomNumber}, #{status})
     </insert>
 
     <update id="update" parameterType="com.appointment.entity.Dept">
         UPDATE dept
-        SET dept_name = #{deptName}, dept_desc = #{deptDesc}, status = #{status}, update_time = NOW()
+        SET dept_name = #{deptName}, dept_desc = #{deptDesc}, area = #{area}, room_number = #{roomNumber}, status = #{status}, update_time = NOW()
         WHERE id = #{id}
     </update>
 

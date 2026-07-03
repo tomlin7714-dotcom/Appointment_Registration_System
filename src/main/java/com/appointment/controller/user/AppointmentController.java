@@ -109,7 +109,7 @@ public class AppointmentController {
         item.put("scheduleId", source.getScheduleId());
         item.put("totalNum", source.getTotalNum());
         item.put("remainNum", source.getRemainNum());
-        item.put("fee", 0.01);
+        item.put("fee", source.getFee() != null ? source.getFee() : 0.01);
         item.put("status", source.getStatus());
 
         Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
@@ -165,7 +165,7 @@ public class AppointmentController {
         appointment.setUserId(userId);
         appointment.setPatientName(patientName);
         appointment.setPatientIdCard(patientIdCard);
-        appointment.setFee(0.01);
+        appointment.setFee(numberSource.getFee() != null ? numberSource.getFee() : 0.01);
         appointment.setStatus(0);
         appointment.setAppointmentTime(new Date());
 
@@ -249,6 +249,8 @@ public class AppointmentController {
 
                         Dept dept = deptMapper.selectById(doctor.getDeptId());
                         item.put("deptName", dept != null ? dept.getDeptName() : "");
+                        item.put("area", dept != null ? dept.getArea() : "");
+                        item.put("roomNumber", dept != null ? dept.getRoomNumber() : "");
                     }
                 }
             }
@@ -299,6 +301,8 @@ public class AppointmentController {
                     Dept dept = deptMapper.selectById(doctor.getDeptId());
                     item.put("deptName", dept != null ? dept.getDeptName() : "");
                     item.put("deptId", doctor.getDeptId());
+                    item.put("area", dept != null ? dept.getArea() : "");
+                    item.put("roomNumber", dept != null ? dept.getRoomNumber() : "");
                 }
             }
         }

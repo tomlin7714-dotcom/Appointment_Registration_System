@@ -57,7 +57,6 @@ public class ScheduleInitializer {
         
         List<Schedule> allSchedules = scheduleMapper.selectAll();
         int deletedCount = 0;
-        int deletedAppointments = 0;
         
         for (Schedule schedule : allSchedules) {
             // 只清理过期的排班（昨天及之前）
@@ -65,11 +64,7 @@ public class ScheduleInitializer {
                 List<NumberSource> numberSources = numberSourceMapper.selectByScheduleId(schedule.getId());
                 
                 for (NumberSource ns : numberSources) {
-                    List<Appointment> appointments = appointmentMapper.selectByNumberSourceId(ns.getId());
-                    for (Appointment apt : appointments) {
-                        appointmentMapper.delete(apt.getId());
-                        deletedAppointments++;
-                    }
+                    // 只删除号源，保留预约记录
                     numberSourceMapper.delete(ns.getId());
                 }
                 
@@ -78,7 +73,7 @@ public class ScheduleInitializer {
             }
         }
         
-        logger.info("清理过期排班完成，删除 {} 个排班，{} 个预约记录", deletedCount, deletedAppointments);
+        logger.info("清理过期排班完成，删除 {} 个排班", deletedCount);
     }
 
     private void generateNewSchedules() {
@@ -134,7 +129,7 @@ public class ScheduleInitializer {
                         numberSource.setScheduleId(schedule.getId());
                         numberSource.setTotalNum(20);
                         numberSource.setRemainNum(20);
-                        numberSource.setFee(0);
+                        numberSource.setFee(0.0);
                         numberSource.setStatus(0);
                         numberSourceMapper.insert(numberSource);
                         

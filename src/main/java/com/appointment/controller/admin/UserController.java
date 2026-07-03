@@ -25,7 +25,9 @@ public class UserController {
 
     @GetMapping("/list")
     public ResponseVo list(@RequestParam(required = false) String keyword,
-                          @RequestParam(required = false) Integer status) {
+                          @RequestParam(required = false) Integer status,
+                          @RequestParam(required = false, defaultValue = "1") Integer page,
+                          @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         List<User> users = userMapper.selectAll();
         
         List<Map<String, Object>> result = new ArrayList<>();
@@ -34,7 +36,9 @@ public class UserController {
             boolean match = true;
             
             if (keyword != null && !keyword.isEmpty()) {
-                if (!user.getRealName().contains(keyword) && !user.getPhone().contains(keyword)) {
+                boolean nameMatch = user.getRealName().contains(keyword);
+                boolean phoneMatch = user.getPhone() != null && user.getPhone().contains(keyword);
+                if (!nameMatch && !phoneMatch) {
                     match = false;
                 }
             }
@@ -54,8 +58,27 @@ public class UserController {
                 result.add(userMap);
             }
         }
+        
+        // 按ID升序排列
+        result.sort((a, b) -> {
+            Integer idA = (Integer) a.get("id");
+            Integer idB = (Integer) b.get("id");
+            return idA.compareTo(idB);
+        });
+        
+        // 分页处理
+        int total = result.size();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
+        
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("list", paginatedResult);
+        responseData.put("total", total);
+        responseData.put("page", page);
+        responseData.put("pageSize", pageSize);
 
-        return ResponseVo.success(result);
+        return ResponseVo.success(responseData);
     }
 
     @GetMapping("/status")

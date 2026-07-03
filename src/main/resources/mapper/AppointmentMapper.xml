@@ -76,4 +76,16 @@
     <delete id="delete">
         DELETE FROM appointment WHERE id = #{id}
     </delete>
+
+    <select id="countTodayAppointments" resultType="int">
+        SELECT COUNT(*)
+        FROM appointment a
+        LEFT JOIN number_source ns ON a.number_source_id = ns.id
+        LEFT JOIN schedule s ON ns.schedule_id = s.id
+        WHERE s.visit_date = #{date}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM appointment
+    </select>
 </mapper>

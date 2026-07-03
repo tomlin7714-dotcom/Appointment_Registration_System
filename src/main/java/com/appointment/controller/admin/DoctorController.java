@@ -43,7 +43,9 @@ public class DoctorController {
     @GetMapping("/list")
     public ResponseVo list(@RequestParam(required = false) String keyword,
                           @RequestParam(required = false) Integer deptId,
-                          @RequestParam(required = false) Integer status) {
+                          @RequestParam(required = false) Integer status,
+                          @RequestParam(required = false, defaultValue = "1") Integer page,
+                          @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         List<Doctor> doctors = doctorMapper.selectAll();
         
         List<Map<String, Object>> result = new ArrayList<>();
@@ -52,7 +54,14 @@ public class DoctorController {
             boolean match = true;
             
             if (keyword != null && !keyword.isEmpty()) {
-                if (!doctor.getName().contains(keyword) && !doctor.getWorkNo().contains(keyword)) {
+                boolean nameMatch = doctor.getName().contains(keyword);
+                boolean phoneMatch = doctor.getPhone() != null && doctor.getPhone().contains(keyword);
+                boolean deptMatch = false;
+                Dept dept = deptMapper.selectById(doctor.getDeptId());
+                if (dept != null) {
+                    deptMatch = dept.getDeptName().contains(keyword);
+                }
+                if (!nameMatch && !phoneMatch && !deptMatch) {
                     match = false;
                 }
             }
@@ -79,8 +88,27 @@ public class DoctorController {
                 result.add(doctorMap);
             }
         }
+        
+        // 按ID升序排列
+        result.sort((a, b) -> {
+            Integer idA = (Integer) a.get("id");
+            Integer idB = (Integer) b.get("id");
+            return idA.compareTo(idB);
+        });
+        
+        // 分页处理
+        int total = result.size();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
+        
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("list", paginatedResult);
+        responseData.put("total", total);
+        responseData.put("page", page);
+        responseData.put("pageSize", pageSize);
 
-        return ResponseVo.success(result);
+        return ResponseVo.success(responseData);
     }
 
     @PostMapping("/save")
@@ -284,7 +312,7 @@ public class DoctorController {
                     numberSource.setScheduleId(schedule.getId());
                     numberSource.setTotalNum(20);
                     numberSource.setRemainNum(20);
-                    numberSource.setFee(0);
+                    numberSource.setFee(0.0);
                     numberSource.setStatus(0);
                     numberSourceMapper.insert(numberSource);
                     

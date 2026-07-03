@@ -130,7 +130,7 @@ public class ScheduleAutoTask {
                         numberSource.setScheduleId(schedule.getId());
                         numberSource.setTotalNum(20);
                         numberSource.setRemainNum(20);
-                        numberSource.setFee(0);
+                        numberSource.setFee(0.0);
                         numberSource.setStatus(0);
                         numberSourceMapper.insert(numberSource);
                         

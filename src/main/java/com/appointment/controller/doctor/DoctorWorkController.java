@@ -63,9 +63,9 @@ public class DoctorWorkController {
 
     @PostMapping("/numbersource/save")
     public ResponseVo saveNumberSource(@RequestBody Map<String, Object> params) {
-        Integer scheduleId = (Integer) params.get("scheduleId");
-        Integer totalNum = (Integer) params.get("totalNum");
-        Integer fee = (Integer) params.get("fee");
+        Integer scheduleId = parseInteger(params.get("scheduleId"));
+        Integer totalNum = parseInteger(params.get("totalNum"));
+        Double fee = parseDouble(params.get("fee"));
 
         if (scheduleId == null || totalNum == null) {
             return ResponseVo.error(400, "参数不完整");
@@ -75,7 +75,7 @@ public class DoctorWorkController {
         numberSource.setScheduleId(scheduleId);
         numberSource.setTotalNum(totalNum);
         numberSource.setRemainNum(totalNum);
-        numberSource.setFee(fee != null ? fee : 0);
+        numberSource.setFee(fee != null ? fee : 0.0);
         numberSource.setStatus(0);
 
         numberSourceMapper.insert(numberSource);
@@ -87,7 +87,10 @@ public class DoctorWorkController {
     }
 
     @GetMapping("/numbersource/list")
-    public ResponseVo getNumberSourceList(@RequestParam Integer doctorId) {
+    public ResponseVo getNumberSourceList(@RequestParam Integer doctorId,
+                                         @RequestParam(required = false, defaultValue = "1") Integer page,
+                                         @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+                                         @RequestParam(required = false) String date) {
         List<NumberSource> numberSources = numberSourceMapper.selectByDoctorId(doctorId);
         
         List<Map<String, Object>> result = new ArrayList<>();
@@ -105,12 +108,38 @@ public class DoctorWorkController {
             if (schedule != null) {
                 item.put("visitDate", schedule.getVisitDate());
                 item.put("visitTime", schedule.getVisitTime());
+                
+                if (date != null && !date.isEmpty() && !schedule.getVisitDate().equals(date)) {
+                    continue;
+                }
             }
 
             result.add(item);
         }
 
-        return ResponseVo.success(result);
+        // 按日期升序排列
+        result.sort((a, b) -> {
+            String dateA = (String) a.get("visitDate");
+            String dateB = (String) b.get("visitDate");
+            if (dateA != null && dateB != null) {
+                return dateA.compareTo(dateB);
+            }
+            return 0;
+        });
+
+        // 分页处理
+        int total = result.size();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
+        
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("list", paginatedResult);
+        responseData.put("total", total);
+        responseData.put("page", page);
+        responseData.put("pageSize", pageSize);
+
+        return ResponseVo.success(responseData);
     }
 
     @GetMapping("/numbersource/close")
@@ -172,8 +201,11 @@ public class DoctorWorkController {
 
     @GetMapping("/appointment/list")
     public ResponseVo getAppointmentList(@RequestParam Integer doctorId,
+                                         @RequestParam(required = false, defaultValue = "1") Integer page,
+                                         @RequestParam(required = false, defaultValue = "10") Integer pageSize,
                                          @RequestParam(required = false) String date,
-                                         @RequestParam(required = false) Integer status) {
+                                         @RequestParam(required = false) Integer status,
+                                         @RequestParam(required = false) String keyword) {
         List<Appointment> appointments = appointmentMapper.selectByDoctorId(doctorId);
         
         List<Map<String, Object>> result = new ArrayList<>();
@@ -192,6 +224,16 @@ public class DoctorWorkController {
                 continue;
             }
 
+            // 模糊查询
+            if (keyword != null && !keyword.isEmpty()) {
+                boolean nameMatch = appointment.getPatientName() != null && appointment.getPatientName().contains(keyword);
+                User user = userMapper.selectById(appointment.getUserId());
+                boolean phoneMatch = user != null && user.getPhone() != null && user.getPhone().contains(keyword);
+                if (!nameMatch && !phoneMatch) {
+                    continue;
+                }
+            }
+
             Map<String, Object> item = new HashMap<>();
             item.put("id", appointment.getId());
             item.put("patientName", appointment.getPatientName());
@@ -208,10 +250,42 @@ public class DoctorWorkController {
                 item.put("phone", user.getPhone());
             }
 
+            Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
+            if (doctor != null) {
+                Dept dept = deptMapper.selectById(doctor.getDeptId());
+                if (dept != null) {
+                    item.put("deptName", dept.getDeptName());
+                    item.put("area", dept.getArea());
+                    item.put("roomNumber", dept.getRoomNumber());
+                }
+            }
+
             result.add(item);
         }
 
-        return ResponseVo.success(result);
+        // 按日期降序排列
+        result.sort((a, b) -> {
+            String dateA = (String) a.get("visitDate");
+            String dateB = (String) b.get("visitDate");
+            if (dateA != null && dateB != null) {
+                return dateB.compareTo(dateA);
+            }
+            return 0;
+        });
+
+        // 分页处理
+        int total = result.size();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
+        
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("list", paginatedResult);
+        responseData.put("total", total);
+        responseData.put("page", page);
+        responseData.put("pageSize", pageSize);
+
+        return ResponseVo.success(responseData);
     }
 
     @GetMapping("/appointment/today")
@@ -247,6 +321,17 @@ public class DoctorWorkController {
             User user = userMapper.selectById(appointment.getUserId());
             if (user != null) {
                 item.put("phone", user.getPhone());
+            }
+
+            // 添加科室和诊室信息
+            Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
+            if (doctor != null) {
+                Dept dept = deptMapper.selectById(doctor.getDeptId());
+                if (dept != null) {
+                    item.put("deptName", dept.getDeptName());
+                    item.put("area", dept.getArea());
+                    item.put("roomNumber", dept.getRoomNumber());
+                }
             }
 
             result.add(item);
@@ -319,6 +404,17 @@ public class DoctorWorkController {
             if (schedule != null) {
                 data.put("visitDate", schedule.getVisitDate());
                 data.put("visitTime", schedule.getVisitTime());
+
+                // 添加科室和诊室信息
+                Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
+                if (doctor != null) {
+                    Dept dept = deptMapper.selectById(doctor.getDeptId());
+                    if (dept != null) {
+                        data.put("deptName", dept.getDeptName());
+                        data.put("area", dept.getArea());
+                        data.put("roomNumber", dept.getRoomNumber());
+                    }
+                }
             }
         }
 
@@ -462,5 +558,202 @@ public class DoctorWorkController {
         Map<String, Object> result = new HashMap<>();
         result.put("deletedCount", deletedCount);
         return ResponseVo.success(result);
+    }
+
+    @GetMapping("/work/dashboard")
+    public ResponseVo getDashboard(@RequestParam Integer doctorId) {
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        
+        Map<String, Object> data = new HashMap<>();
+        
+        // 获取统计数据
+        List<Appointment> allAppointments = appointmentMapper.selectByDoctorId(doctorId);
+        int todayTotal = 0;
+        int todayCompleted = 0;
+        int todayPending = 0;
+        
+        for (Appointment appointment : allAppointments) {
+            NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
+            if (source == null) continue;
+            
+            Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
+            if (schedule == null) continue;
+            
+            if (schedule.getVisitDate().equals(today)) {
+                todayTotal++;
+                if (appointment.getStatus() == 3) {
+                    todayCompleted++;
+                } else if (appointment.getStatus() == 1 || appointment.getStatus() == 2) {
+                    todayPending++;
+                }
+            }
+        }
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("todayAppoint", todayTotal);
+        stats.put("waitingCount", todayPending);
+        stats.put("completedCount", todayCompleted);
+        
+        // 获取本周排班数
+        List<Schedule> schedules = scheduleMapper.selectByDoctorId(doctorId);
+        Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(Calendar.MONDAY);
+        cal.setTime(new Date());
+        int weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+        
+        int weekScheduleCount = 0;
+        for (Schedule schedule : schedules) {
+            Calendar sCal = Calendar.getInstance();
+            sCal.setFirstDayOfWeek(Calendar.MONDAY);
+            sCal.setTime(java.sql.Date.valueOf(schedule.getVisitDate()));
+            if (sCal.get(Calendar.WEEK_OF_YEAR) == weekOfYear) {
+                weekScheduleCount++;
+            }
+        }
+        stats.put("totalSchedule", weekScheduleCount);
+        
+        data.put("stats", stats);
+        
+        // 获取今日预约列表
+        List<Map<String, Object>> todayList = new ArrayList<>();
+        for (Appointment appointment : allAppointments) {
+            NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
+            if (source == null) continue;
+            
+            Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
+            if (schedule == null) continue;
+            
+            if (!schedule.getVisitDate().equals(today)) continue;
+            
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", appointment.getId());
+            item.put("appointmentNo", appointment.getId());
+            item.put("patientName", appointment.getPatientName());
+            item.put("appointmentTime", appointment.getAppointmentTime());
+            item.put("visitDate", schedule.getVisitDate());
+            item.put("visitTime", schedule.getVisitTime());
+            item.put("status", appointment.getStatus());
+            
+            todayList.add(item);
+        }
+        
+        // 按预约时间排序
+        todayList.sort((a, b) -> {
+            java.util.Date timeA = (java.util.Date) a.get("appointmentTime");
+            java.util.Date timeB = (java.util.Date) b.get("appointmentTime");
+            if (timeA != null && timeB != null) {
+                return timeA.compareTo(timeB);
+            }
+            return 0;
+        });
+        
+        data.put("todayList", todayList);
+        
+        return ResponseVo.success(data);
+    }
+
+    @GetMapping("/profile/get")
+    public ResponseVo getProfile(@RequestParam Integer doctorId) {
+        if (doctorId == null) {
+            return ResponseVo.error(400, "医生ID不能为空");
+        }
+
+        Doctor doctor = doctorMapper.selectById(doctorId);
+        if (doctor == null) {
+            return ResponseVo.error(404, "医生不存在");
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", doctor.getId());
+        data.put("workNo", doctor.getWorkNo());
+        data.put("name", doctor.getName());
+        data.put("title", doctor.getTitle());
+        data.put("phone", doctor.getPhone());
+        data.put("remark", doctor.getIntro());
+        data.put("specialty", doctor.getSpecialty());
+
+        Dept dept = deptMapper.selectById(doctor.getDeptId());
+        data.put("deptName", dept != null ? dept.getDeptName() : "");
+
+        return ResponseVo.success(data);
+    }
+
+    @PostMapping("/profile/update")
+    public ResponseVo updateProfile(@RequestBody Map<String, Object> params) {
+        Integer doctorId = (Integer) params.get("id");
+        String name = (String) params.get("name");
+        String phone = (String) params.get("phone");
+        String title = (String) params.get("title");
+        String remark = (String) params.get("remark");
+        String specialty = (String) params.get("specialty");
+
+        if (doctorId == null) {
+            return ResponseVo.error(400, "医生ID不能为空");
+        }
+
+        Doctor doctor = doctorMapper.selectById(doctorId);
+        if (doctor == null) {
+            return ResponseVo.error(404, "医生不存在");
+        }
+
+        if (name != null) {
+            doctor.setName(name);
+        }
+        if (phone != null) {
+            doctor.setPhone(phone);
+        }
+        if (title != null) {
+            doctor.setTitle(title);
+        }
+        if (remark != null) {
+            doctor.setIntro(remark);
+        }
+        if (specialty != null) {
+            doctor.setSpecialty(specialty);
+        }
+
+        doctorMapper.update(doctor);
+
+        return ResponseVo.success();
+    }
+
+    @PostMapping("/profile/changePwd")
+    public ResponseVo changePassword(@RequestBody Map<String, String> params) {
+        String oldPwd = params.get("oldPwd");
+        String newPwd = params.get("newPwd");
+        Integer doctorId = Integer.parseInt(params.get("doctorId"));
+
+        if (oldPwd == null || newPwd == null || doctorId == null) {
+            return ResponseVo.error(400, "参数不完整");
+        }
+
+        Doctor doctor = doctorMapper.selectById(doctorId);
+        if (doctor == null) {
+            return ResponseVo.error(404, "医生不存在");
+        }
+
+        if (!doctor.getPwd().equals(oldPwd)) {
+            return ResponseVo.error(400, "旧密码错误");
+        }
+
+        doctor.setPwd(newPwd);
+        doctorMapper.update(doctor);
+
+        return ResponseVo.success();
+    }
+
+    private Double parseDouble(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof Double) return (Double) obj;
+        if (obj instanceof Integer) return ((Integer) obj).doubleValue();
+        if (obj instanceof String) {
+            try {
+                return Double.parseDouble((String) obj);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        if (obj instanceof Number) return ((Number) obj).doubleValue();
+        return null;
     }
 }

@@ -6,6 +6,8 @@ public class Dept {
     private Integer id;
     private String deptName;
     private String deptDesc;
+    private String area; // 区域（如1区、2区等）
+    private String roomNumber; // 诊室号
     private Date createTime;
     private Date updateTime;
     private Integer status;
@@ -32,6 +34,22 @@ public class Dept {
 
     public void setDeptDesc(String deptDesc) {
         this.deptDesc = deptDesc;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    public void setRoomNumber(String roomNumber) {
+        this.roomNumber = roomNumber;
     }
 
     public Date getCreateTime() {

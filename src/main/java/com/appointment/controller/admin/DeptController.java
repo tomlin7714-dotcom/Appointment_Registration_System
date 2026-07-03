@@ -8,6 +8,7 @@ import com.appointment.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,18 +25,43 @@ public class DeptController {
     private OperateLogMapper operateLogMapper;
 
     @GetMapping("/list")
-    public ResponseVo list() {
+    public ResponseVo list(@RequestParam(required = false, defaultValue = "1") Integer page,
+                          @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         List<Dept> depts = deptMapper.selectAll();
+        
+        List<Map<String, Object>> result = new ArrayList<>();
         
         for (Dept dept : depts) {
             Map<String, Object> deptMap = new HashMap<>();
             deptMap.put("id", dept.getId());
             deptMap.put("name", dept.getDeptName());
+            deptMap.put("deptName", dept.getDeptName());
             deptMap.put("remark", dept.getDeptDesc());
+            deptMap.put("deptDesc", dept.getDeptDesc());
             deptMap.put("createTime", dept.getCreateTime());
+            result.add(deptMap);
         }
         
-        return ResponseVo.success(depts);
+        // 按ID升序排列
+        result.sort((a, b) -> {
+            Integer idA = (Integer) a.get("id");
+            Integer idB = (Integer) b.get("id");
+            return idA.compareTo(idB);
+        });
+        
+        // 分页处理
+        int total = result.size();
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
+        
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("list", paginatedResult);
+        responseData.put("total", total);
+        responseData.put("page", page);
+        responseData.put("pageSize", pageSize);
+        
+        return ResponseVo.success(responseData);
     }
 
     @PostMapping("/save")

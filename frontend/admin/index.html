@@ -194,6 +194,54 @@
             background: #f8f9fa;
         }
         
+        .table-container {
+            height: 486px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .table-container .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .pagination-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 40px;
+            padding: 10px 0;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .pagination-buttons button {
+            min-width: 36px;
+            height: 36px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .pagination-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         /* 表单样式 */
         .form-group {
             margin-bottom: 20px;
@@ -404,20 +452,25 @@
                         <span class="card-title">科室列表</span>
                         <button class="btn btn-primary" onclick="openDeptModal()">+ 新增科室</button>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>科室名称</th>
-                                <th>科室简介</th>
-                                <th>创建时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deptTableBody">
-                            <!-- 动态加载 -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>科室名称</th>
+                                    <th>科室简介</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="deptPaginationInfo"></div>
+                        <div class="pagination-buttons" id="deptPagination"></div>
+                    </div>
                 </div>
             </div>
 
@@ -429,25 +482,36 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">医生列表</span>
-                        <button class="btn btn-primary" onclick="openDoctorModal()">+ 新增医生</button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="display: flex; gap: 5px;">
+                                <input type="text" id="doctorSearch" placeholder="搜索医生姓名、科室或手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 200px;">
+                                <button class="btn btn-primary" onclick="loadDoctorList()" style="padding: 8px 16px;">搜索</button>
+                            </div>
+                            <button class="btn btn-primary" onclick="openDoctorModal()">+ 新增医生</button>
+                        </div>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>姓名</th>
-                                <th>账号</th>
-                                <th>科室</th>
-                                <th>职称</th>
-                                <th>电话</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="doctorTableBody">
-                            <!-- 动态加载 -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>账号</th>
+                                    <th>科室</th>
+                                    <th>职称</th>
+                                    <th>电话</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctorTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="doctorPaginationInfo"></div>
+                        <div class="pagination-buttons" id="doctorPagination"></div>
+                    </div>
                 </div>
             </div>
 
@@ -459,23 +523,34 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">用户列表</span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="display: flex; gap: 5px;">
+                                <input type="text" id="userSearch" placeholder="搜索用户姓名或手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 200px;">
+                                <button class="btn btn-primary" onclick="loadUserList()" style="padding: 8px 16px;">搜索</button>
+                            </div>
+                        </div>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>姓名</th>
-                                <th>手机号</th>
-                                <th>身份证号</th>
-                                <th>状态</th>
-                                <th>注册时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <!-- 动态加载 -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>手机号</th>
+                                    <th>身份证号</th>
+                                    <th>状态</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="userPaginationInfo"></div>
+                        <div class="pagination-buttons" id="userPagination"></div>
+                    </div>
                 </div>
             </div>
 
@@ -613,6 +688,14 @@
         // API基础地址
         const API_BASE_URL = 'http://localhost:8083';
         
+        // 分页参数
+        let deptPage = 1;
+        let deptPageSize = 10;
+        let doctorPage = 1;
+        let doctorPageSize = 10;
+        let userPage = 1;
+        let userPageSize = 10;
+        
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('adminToken');
@@ -708,7 +791,7 @@
         // 加载科室列表
         async function loadDeptList() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/dept/list`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/dept/list?page=${deptPage}&pageSize=${deptPageSize}`, {
                     headers: {
                         'token': localStorage.getItem('adminToken')
                     }
@@ -717,8 +800,9 @@
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    renderDeptTable(data.data);
-                    updateDeptSelect(data.data);
+                    renderDeptTable(data.data.list);
+                    renderPagination('dept', data.data.total, data.data.page, data.data.pageSize);
+                    updateDeptSelect(data.data.list);
                 } else {
                     showMessage(data.msg || '加载科室列表失败', 'error');
                 }
@@ -859,8 +943,10 @@
         
         // 加载医生列表
         async function loadDoctorList() {
+            const keyword = document.getElementById('doctorSearch')?.value || '';
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/doctor/list`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/doctor/list?page=${doctorPage}&pageSize=${doctorPageSize}&keyword=${encodeURIComponent(keyword)}`, {
                     headers: {
                         'token': localStorage.getItem('adminToken')
                     }
@@ -869,7 +955,8 @@
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    renderDoctorTable(data.data);
+                    renderDoctorTable(data.data.list);
+                    renderPagination('doctor', data.data.total, data.data.page, data.data.pageSize);
                 } else {
                     showMessage(data.msg || '加载医生列表失败', 'error');
                 }
@@ -1021,8 +1108,10 @@
         
         // 加载用户列表
         async function loadUserList() {
+            const keyword = document.getElementById('userSearch')?.value || '';
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/user/list`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/user/list?page=${userPage}&pageSize=${userPageSize}&keyword=${encodeURIComponent(keyword)}`, {
                     headers: {
                         'token': localStorage.getItem('adminToken')
                     }
@@ -1031,7 +1120,8 @@
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    renderUserTable(data.data);
+                    renderUserTable(data.data.list);
+                    renderPagination('user', data.data.total, data.data.page, data.data.pageSize);
                 } else {
                     showMessage(data.msg || '加载用户列表失败', 'error');
                 }
@@ -1090,6 +1180,124 @@
                 console.error('切换用户状态错误:', error);
                 showMessage('网络错误，请稍后重试', 'error');
             }
+        }
+        
+        // 渲染分页控件
+        function renderPagination(type, total, currentPage, pageSize) {
+            const paginationDiv = document.getElementById(`${type}Pagination`);
+            const infoDiv = document.getElementById(`${type}PaginationInfo`);
+            
+            if (!paginationDiv || !infoDiv) return;
+            
+            const totalPages = Math.ceil(total / pageSize);
+            
+            infoDiv.textContent = `共 ${total} 条记录，第 ${currentPage}/${totalPages} 页`;
+            
+            paginationDiv.innerHTML = '';
+            
+            const prevBtn = document.createElement('button');
+            prevBtn.style.background = '#f0f0f0';
+            prevBtn.textContent = '上一页';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = function() {
+                if (type === 'dept') {
+                    deptPage = currentPage - 1;
+                    loadDeptList();
+                } else if (type === 'doctor') {
+                    doctorPage = currentPage - 1;
+                    loadDoctorList();
+                } else {
+                    userPage = currentPage - 1;
+                    loadUserList();
+                }
+            };
+            paginationDiv.appendChild(prevBtn);
+            
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.style.background = i === currentPage ? '#667eea' : '#f0f0f0';
+                pageBtn.style.color = i === currentPage ? 'white' : 'black';
+                pageBtn.textContent = i;
+                pageBtn.onclick = function() {
+                    if (type === 'dept') {
+                        deptPage = i;
+                        loadDeptList();
+                    } else if (type === 'doctor') {
+                        doctorPage = i;
+                        loadDoctorList();
+                    } else {
+                        userPage = i;
+                        loadUserList();
+                    }
+                };
+                paginationDiv.appendChild(pageBtn);
+            }
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.style.background = '#f0f0f0';
+            nextBtn.textContent = '下一页';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = function() {
+                if (type === 'dept') {
+                    deptPage = currentPage + 1;
+                    loadDeptList();
+                } else if (type === 'doctor') {
+                    doctorPage = currentPage + 1;
+                    loadDoctorList();
+                } else {
+                    userPage = currentPage + 1;
+                    loadUserList();
+                }
+            };
+            paginationDiv.appendChild(nextBtn);
+            
+            // 页面跳转
+            const jumpDiv = document.createElement('div');
+            jumpDiv.style.display = 'flex';
+            jumpDiv.style.alignItems = 'center';
+            jumpDiv.style.gap = '5px';
+            jumpDiv.style.marginLeft = '10px';
+            
+            const jumpInput = document.createElement('input');
+            jumpInput.type = 'number';
+            jumpInput.min = '1';
+            jumpInput.max = totalPages;
+            jumpInput.value = currentPage;
+            jumpInput.style.width = '50px';
+            jumpInput.style.height = '32px';
+            jumpInput.style.textAlign = 'center';
+            jumpInput.style.border = '1px solid #e0e0e0';
+            jumpInput.style.borderRadius = '5px';
+            jumpInput.style.padding = '0 5px';
+            
+            const jumpBtn = document.createElement('button');
+            jumpBtn.style.background = '#667eea';
+            jumpBtn.style.color = 'white';
+            jumpBtn.textContent = '跳转';
+            jumpBtn.onclick = function() {
+                let targetPage = parseInt(jumpInput.value);
+                if (targetPage >= 1 && targetPage <= totalPages) {
+                    if (type === 'dept') {
+                        deptPage = targetPage;
+                        loadDeptList();
+                    } else if (type === 'doctor') {
+                        doctorPage = targetPage;
+                        loadDoctorList();
+                    } else {
+                        userPage = targetPage;
+                        loadUserList();
+                    }
+                } else {
+                    alert('请输入有效的页码（1-' + totalPages + '）');
+                }
+            };
+            
+            jumpDiv.appendChild(jumpInput);
+            jumpDiv.appendChild(jumpBtn);
+            paginationDiv.appendChild(jumpDiv);
         }
         
         // ==================== 系统日志 ====================
