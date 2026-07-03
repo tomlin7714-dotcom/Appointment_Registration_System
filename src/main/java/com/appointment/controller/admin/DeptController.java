@@ -38,6 +38,8 @@ public class DeptController {
             deptMap.put("deptName", dept.getDeptName());
             deptMap.put("remark", dept.getDeptDesc());
             deptMap.put("deptDesc", dept.getDeptDesc());
+            deptMap.put("area", dept.getArea());
+            deptMap.put("roomNumber", dept.getRoomNumber());
             deptMap.put("createTime", dept.getCreateTime());
             result.add(deptMap);
         }
@@ -65,9 +67,11 @@ public class DeptController {
     }
 
     @PostMapping("/save")
-    public ResponseVo save(@RequestBody Map<String, String> params) {
-        String name = params.get("name");
-        String remark = params.get("remark");
+    public ResponseVo save(@RequestBody Map<String, Object> params) {
+        String name = (String) params.get("name");
+        String remark = (String) params.get("remark");
+        String area = (String) params.get("area");
+        String roomNumber = (String) params.get("roomNumber");
 
         if (name == null || name.isEmpty()) {
             return ResponseVo.error(400, "科室名称不能为空");
@@ -76,6 +80,8 @@ public class DeptController {
         Dept dept = new Dept();
         dept.setDeptName(name);
         dept.setDeptDesc(remark);
+        dept.setArea(area);
+        dept.setRoomNumber(roomNumber);
         dept.setStatus(0);
 
         deptMapper.insert(dept);
@@ -95,9 +101,11 @@ public class DeptController {
 
     @PostMapping("/modify")
     public ResponseVo modify(@RequestBody Map<String, Object> params) {
-        Integer id = (Integer) params.get("id");
+        Integer id = parseInteger(params.get("id"));
         String name = (String) params.get("name");
         String remark = (String) params.get("remark");
+        String area = (String) params.get("area");
+        String roomNumber = (String) params.get("roomNumber");
 
         if (id == null) {
             return ResponseVo.error(400, "科室ID不能为空");
@@ -113,6 +121,12 @@ public class DeptController {
         }
         if (remark != null) {
             dept.setDeptDesc(remark);
+        }
+        if (area != null) {
+            dept.setArea(area);
+        }
+        if (roomNumber != null) {
+            dept.setRoomNumber(roomNumber);
         }
 
         deptMapper.update(dept);
@@ -142,5 +156,42 @@ public class DeptController {
         operateLogMapper.insert(log);
 
         return ResponseVo.success();
+    }
+
+    @GetMapping("/get")
+    public ResponseVo get(@RequestParam Integer id) {
+        if (id == null) {
+            return ResponseVo.error(400, "科室ID不能为空");
+        }
+
+        Dept dept = deptMapper.selectById(id);
+        if (dept == null) {
+            return ResponseVo.error(404, "科室不存在");
+        }
+
+        Map<String, Object> deptMap = new HashMap<>();
+        deptMap.put("id", dept.getId());
+        deptMap.put("name", dept.getDeptName());
+        deptMap.put("deptName", dept.getDeptName());
+        deptMap.put("remark", dept.getDeptDesc());
+        deptMap.put("deptDesc", dept.getDeptDesc());
+        deptMap.put("area", dept.getArea());
+        deptMap.put("roomNumber", dept.getRoomNumber());
+
+        return ResponseVo.success(deptMap);
+    }
+
+    private Integer parseInteger(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof Integer) return (Integer) obj;
+        if (obj instanceof String) {
+            try {
+                return Integer.parseInt((String) obj);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        if (obj instanceof Number) return ((Number) obj).intValue();
+        return null;
     }
 }

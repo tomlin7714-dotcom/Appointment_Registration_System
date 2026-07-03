@@ -458,6 +458,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>科室名称</th>
+                                    <th>区域</th>
+                                    <th>诊室号</th>
                                     <th>科室简介</th>
                                     <th>创建时间</th>
                                     <th>操作</th>
@@ -625,6 +627,14 @@
                     <div class="form-group">
                         <label>科室简介</label>
                         <textarea id="deptRemark" rows="4" placeholder="请输入科室简介"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>区域</label>
+                        <input type="text" id="deptArea" placeholder="如：1区、2区">
+                    </div>
+                    <div class="form-group">
+                        <label>诊室号</label>
+                        <input type="text" id="deptRoomNumber" placeholder="如：101、201">
                     </div>
                 </form>
             </div>
@@ -822,6 +832,8 @@
                 tr.innerHTML = `
                     <td>${dept.id}</td>
                     <td>${dept.deptName || dept.name}</td>
+                    <td>${dept.area || '-'}</td>
+                    <td>${dept.roomNumber || '-'}</td>
                     <td>${dept.deptDesc || dept.remark || '-'}</td>
                     <td>${dept.createTime || '-'}</td>
                     <td>
@@ -860,10 +872,33 @@
         }
         
         // 编辑科室
-        function editDept(id) {
-            // 模拟编辑功能
+        async function editDept(id) {
             document.getElementById('deptModalTitle').textContent = '编辑科室';
-            document.getElementById('deptId').value = id;
+            document.getElementById('deptForm').reset();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/dept/get?id=${id}`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    const dept = data.data;
+                    document.getElementById('deptId').value = id;
+                    document.getElementById('deptName').value = dept.deptName || dept.name || '';
+                    document.getElementById('deptRemark').value = dept.deptDesc || dept.remark || '';
+                    document.getElementById('deptArea').value = dept.area || '';
+                    document.getElementById('deptRoomNumber').value = dept.roomNumber || '';
+                } else {
+                    showMessage('获取科室信息失败', 'error');
+                }
+            } catch (error) {
+                console.error('获取科室信息错误:', error);
+            }
+
             document.getElementById('deptModal').classList.add('active');
         }
         
@@ -872,20 +907,26 @@
             const id = document.getElementById('deptId').value;
             const name = document.getElementById('deptName').value.trim();
             const remark = document.getElementById('deptRemark').value.trim();
-            
+            const area = document.getElementById('deptArea').value.trim();
+            const roomNumber = document.getElementById('deptRoomNumber').value.trim();
+
             if (!name) {
                 showMessage('请输入科室名称', 'error');
                 return;
             }
-            
+
             try {
-                const url = id ? 
-                    `${API_BASE_URL}/api/admin/dept/modify` : 
+                const url = id ?
+                    `${API_BASE_URL}/api/admin/dept/modify` :
                     `${API_BASE_URL}/api/admin/dept/save`;
-                
-                const body = id ? 
-                    { id, name, remark } : 
-                    { name, remark };
+
+                const body = {
+                    name,
+                    remark,
+                    area,
+                    roomNumber
+                };
+                if (id) { body.id = id; }
                 
                 const response = await fetch(url, {
                     method: 'POST',
