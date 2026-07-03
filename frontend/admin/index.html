@@ -1600,7 +1600,7 @@
                     <td>${item.patientName || '-'}</td>
                     <td>${item.doctorName || '-'}</td>
                     <td><span style="color: ${item.status === 1 ? '#27ae60' : '#e67e22'};">${statusText}</span></td>
-                    <td>${item.createTime ? item.createTime.substring(0, 19) : '-'}</td>
+                    <td>${item.createTime || '-'}</td>
                     <td>
                         <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="editConsultation(${item.id})">编辑</button>
                         <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px; background: #f39c12; color: white;" onclick="toggleConsultationStatus(${item.id}, ${item.status})">${item.status === 1 ? '设为待诊断' : '设为已完成'}</button>

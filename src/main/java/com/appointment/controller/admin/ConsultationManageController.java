@@ -6,6 +6,7 @@ import com.appointment.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -131,7 +132,8 @@ public class ConsultationManageController {
         m.put("treatment", cf.getTreatment());
         m.put("examination", cf.getExamination());
         m.put("status", cf.getStatus());
-        m.put("createTime", cf.getCreateTime() != null ? cf.getCreateTime().toString() : "");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        m.put("createTime", cf.getCreateTime() != null ? sdf.format(cf.getCreateTime()) : "");
         return m;
     }
 
