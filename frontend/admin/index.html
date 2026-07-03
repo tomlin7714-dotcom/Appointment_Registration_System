@@ -785,19 +785,19 @@
         // 加载概览数据
         async function loadDashboardData() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/test/db`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/stats/overview`, {
                     headers: {
                         'token': localStorage.getItem('adminToken')
                     }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.code === 200) {
                     document.getElementById('deptCount').textContent = data.data.deptCount || 0;
                     document.getElementById('doctorCount').textContent = data.data.doctorCount || 0;
                     document.getElementById('userCount').textContent = data.data.userCount || 0;
-                    document.getElementById('appointmentCount').textContent = '0';
+                    document.getElementById('appointmentCount').textContent = data.data.appointmentCount || 0;
                 }
             } catch (error) {
                 console.error('加载概览数据错误:', error);
