@@ -10,6 +10,7 @@
   <scroll-view class="list-scroll" scroll-y="true" refresher-enabled="true" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onRefresh">
     <view class="record-item" wx:for="{{recordList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.appointmentId}}">
       <view class="record-header">
+        <text class="consultation-no" wx:if="{{item.consultationNo}}">{{item.consultationNo}}</text>
         <text class="doctor-name">{{item.doctorName}}</text>
         <text class="doctor-dept">{{item.deptName}}</text>
         <text class="record-status {{item.appointmentStatus === 3 ? 'completed' : item.appointmentStatus === 4 ? 'cancelled' : ''}}">

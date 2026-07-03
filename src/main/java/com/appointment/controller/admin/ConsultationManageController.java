@@ -127,7 +127,13 @@ public class ConsultationManageController {
         m.put("id", cf.getId());
         m.put("consultationNo", cf.getConsultationNo());
         m.put("patientName", cf.getPatientName());
+        m.put("patientIdCard", cf.getPatientIdCard());
         m.put("doctorName", cf.getDoctorName());
+        m.put("deptName", cf.getDeptName());
+        m.put("formType", cf.getFormType());
+        m.put("chiefComplaint", cf.getChiefComplaint());
+        m.put("presentIllness", cf.getPresentIllness());
+        m.put("pastHistory", cf.getPastHistory());
         m.put("diagnosis", cf.getDiagnosis());
         m.put("treatment", cf.getTreatment());
         m.put("examination", cf.getExamination());

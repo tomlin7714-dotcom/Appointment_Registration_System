@@ -14,6 +14,10 @@
           {{detail.appointmentStatus === 3 ? '已完成' : detail.appointmentStatus === 4 ? '已取消' : '待就诊'}}
         </text>
       </view>
+      <view class="info-row" wx:if="{{detail.consultationNo}}">
+        <text class="label">问诊编号</text>
+        <text class="value">{{detail.consultationNo}}</text>
+      </view>
       <view class="info-row">
         <text class="label">医生</text>
         <text class="value">{{detail.doctorName || '-'}} <text class="doctor-title-tag" wx:if="{{detail.doctorTitle}}">{{detail.doctorTitle}}</text></text>

@@ -641,50 +641,99 @@
 
             <!-- 问诊编辑模态框 -->
             <div class="modal" id="consultationEditModal">
-                <div class="modal-content" style="width: 600px;">
+                <div class="modal-content" style="width: 700px;">
                     <div class="modal-header">
                         <span class="modal-title" id="consultationEditTitle">编辑问诊单</span>
                         <button class="modal-close" onclick="closeConsultationEditModal()">&times;</button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
                         <form id="consultationEditForm">
                             <input type="hidden" id="editConsultationId">
-                            <div class="form-group">
-                                <label>问诊编号</label>
-                                <input type="text" id="editConsultationNo" readonly style="background: #f5f5f5;">
+
+                            <!-- 基础信息 -->
+                            <h4 style="color: #667eea; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0;">📋 基础信息</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>问诊编号</label>
+                                    <input type="text" id="editConsultationNo" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>问诊状态</label>
+                                    <select id="editFormStatus" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                        <option value="0">待诊断</option>
+                                        <option value="1">已完成</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>患者姓名</label>
-                                <input type="text" id="editPatientName" readonly style="background: #f5f5f5;">
+
+                            <!-- 患者信息 -->
+                            <h4 style="color: #27ae60; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; margin-top: 20px;">👤 患者信息</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>患者姓名</label>
+                                    <input type="text" id="editPatientName" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>身份证号</label>
+                                    <input type="text" id="editPatientIdCard" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>医生姓名</label>
-                                <input type="text" id="editDoctorName" readonly style="background: #f5f5f5;">
+
+                            <!-- 医生信息 -->
+                            <h4 style="color: #e67e22; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; margin-top: 20px;">👨‍⚕️ 医生信息</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>医生姓名</label>
+                                    <input type="text" id="editDoctorName" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>科室</label>
+                                    <input type="text" id="editDeptName" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
                             </div>
-                            <div class="form-group">
+
+                            <!-- 患者问诊信息 -->
+                            <h4 style="color: #2196f3; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; margin-top: 20px;">📝 患者自述</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>问诊类型</label>
+                                    <input type="text" id="editFormType" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label>主诉</label>
+                                <textarea id="editChiefComplaint" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%; min-height: 60px;"></textarea>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>现病史</label>
+                                    <textarea id="editPresentIllness" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%; min-height: 60px;"></textarea>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label>既往史</label>
+                                    <textarea id="editPastHistory" readonly style="background: #f5f5f5; padding: 8px; border: 1px solid #e0e0e0; border-radius: 5px; width: 100%; min-height: 60px;"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- 医生诊断（可编辑） -->
+                            <h4 style="color: #e74c3c; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; margin-top: 20px;">💊 医生诊断</h4>
+                            <div class="form-group" style="margin-bottom: 12px;">
                                 <label>检查</label>
-                                <textarea id="editExamination" rows="2" placeholder="检查结果"></textarea>
+                                <textarea id="editExamination" rows="2" placeholder="检查结果" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;"></textarea>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom: 12px;">
                                 <label>诊断结果</label>
-                                <textarea id="editDiagnosis" rows="3" placeholder="诊断结果"></textarea>
+                                <textarea id="editDiagnosis" rows="3" placeholder="诊断结果" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;"></textarea>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom: 12px;">
                                 <label>治疗方案</label>
-                                <textarea id="editTreatment" rows="3" placeholder="治疗方案"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>状态</label>
-                                <select id="editFormStatus">
-                                    <option value="0">待诊断</option>
-                                    <option value="1">已完成</option>
-                                </select>
+                                <textarea id="editTreatment" rows="3" placeholder="治疗方案" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;"></textarea>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button class="btn" onclick="closeConsultationEditModal()" style="background: #e0e0e0; color: #333;">取消</button>
-                        <button class="btn btn-primary" onclick="saveConsultationEdit()">保存</button>
+                        <button class="btn btn-primary" onclick="saveConsultationEdit()">保存修改</button>
                     </div>
                 </div>
             </div>
@@ -1623,13 +1672,19 @@
                     const c = data.data;
                     document.getElementById('editConsultationId').value = c.id;
                     document.getElementById('editConsultationNo').value = c.consultationNo || '-';
+                    document.getElementById('editFormStatus').value = c.status || 0;
                     document.getElementById('editPatientName').value = c.patientName || '-';
+                    document.getElementById('editPatientIdCard').value = c.patientIdCard || '-';
                     document.getElementById('editDoctorName').value = c.doctorName || '-';
+                    document.getElementById('editDeptName').value = c.deptName || '-';
+                    document.getElementById('editFormType').value = c.formType || '-';
+                    document.getElementById('editChiefComplaint').value = c.chiefComplaint || '';
+                    document.getElementById('editPresentIllness').value = c.presentIllness || '';
+                    document.getElementById('editPastHistory').value = c.pastHistory || '';
                     document.getElementById('editExamination').value = c.examination || '';
                     document.getElementById('editDiagnosis').value = c.diagnosis || '';
                     document.getElementById('editTreatment').value = c.treatment || '';
-                    document.getElementById('editFormStatus').value = c.status || 0;
-                    document.getElementById('consultationEditTitle').textContent = '编辑问诊单';
+                    document.getElementById('consultationEditTitle').textContent = '编辑问诊单 (#' + c.id + ')';
                     document.getElementById('consultationEditModal').classList.add('active');
                 } else {
                     showMessage(data.msg || '获取失败', 'error');
