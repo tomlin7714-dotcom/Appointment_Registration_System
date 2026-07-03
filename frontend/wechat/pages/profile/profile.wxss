@@ -36,7 +36,6 @@
   height: 120rpx;
   border-radius: 50%;
 }
-}
 
 .avatar-text {
   font-size: 48rpx;

@@ -20,7 +20,7 @@ public class UserInfoController {
     @Autowired
     private UserMapper userMapper;
 
-    @Value("${file.upload.dir:uploads/avatars}")
+    @Value("${file.upload.dir:}")
     private String uploadDir;
 
     @GetMapping("/info")
@@ -74,8 +74,10 @@ public class UserInfoController {
         }
 
         try {
-            // 确保目录存在
-            File dir = new File(uploadDir);
+            // 使用项目根目录下的 uploads/avatars
+            String baseDir = System.getProperty("user.dir");
+            String saveDir = uploadDir.isEmpty() ? baseDir + "/uploads/avatars" : uploadDir;
+            File dir = new File(saveDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
