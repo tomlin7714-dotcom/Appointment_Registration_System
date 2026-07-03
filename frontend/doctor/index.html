@@ -923,6 +923,23 @@
         </div>
     </div>
 
+    <!-- 问诊单模态框 -->
+    <div class="modal" id="consultationModal">
+        <div class="modal-content" style="width: 700px;">
+            <div class="modal-header">
+                <span class="modal-title">📋 问诊单</span>
+                <button class="modal-close" onclick="closeConsultationModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="consultationModalBody" style="max-height: 65vh; overflow-y: auto;">
+                <div style="text-align: center; padding: 40px; color: #999;">加载中...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeConsultationModal()" style="background: #e0e0e0; color: #333;">关闭</button>
+                <button class="btn btn-primary" onclick="saveConsultationFromModal()">💾 保存问诊单并完成就诊</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // API基础地址
         const API_BASE_URL = 'http://localhost:8083';
@@ -1625,7 +1642,9 @@
                     <td>${app.visitTime || '-'}</td>
                     <td>${statusText}</td>
                     <td>
-                        ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="callPatientById(${app.id})">叫号</button>` : '-'}
+                        ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="callPatientById(${app.id})">叫号</button>` : ''}
+                        ${app.status === 1 || app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="openConsultationModal(${app.id})">问诊</button>` : ''}
+                        ${app.status !== 1 && app.status !== 2 ? '-' : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1697,6 +1716,7 @@
                     <td>${statusText}</td>
                     <td>
                         ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="startConsultation(${app.id})">开始就诊</button>` : ''}
+                        ${app.status === 1 || app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="openConsultationModal(${app.id})">问诊</button>` : ''}
                         ${app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="completeAppointment(${app.id})">完成就诊</button>` : ''}
                         ${app.status !== 1 && app.status !== 2 ? '-' : ''}
                     </td>
@@ -1973,6 +1993,137 @@
         }
 
         // 保存诊断并完成就诊
+        // ==================== 问诊单弹窗 ====================
+
+        let consultationModalData = null;
+
+        async function openConsultationModal(appointmentId) {
+            if (!appointmentId) {
+                showMessage('参数错误', 'error');
+                return;
+            }
+
+            document.getElementById('consultationModal').classList.add('active');
+            document.getElementById('consultationModalBody').innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">加载中...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/consultation/get?appointmentId=${appointmentId}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    consultationModalData = data.data;
+                    consultationModalData.appointmentId = appointmentId;
+                    renderConsultationModal(data.data);
+                } else {
+                    document.getElementById('consultationModalBody').innerHTML = `<div style="text-align: center; padding: 40px; color: #e74c3c;">${data.msg || '加载失败'}</div>`;
+                }
+            } catch (error) {
+                console.error('加载问诊单错误:', error);
+                document.getElementById('consultationModalBody').innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">网络错误</div>';
+            }
+        }
+
+        function closeConsultationModal() {
+            document.getElementById('consultationModal').classList.remove('active');
+            consultationModalData = null;
+        }
+
+        function renderConsultationModal(c) {
+            let html = '';
+
+            // 患者基本信息
+            html += '<div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #667eea;">';
+            html += '<h4 style="color: #333; margin-bottom: 12px;">👤 患者信息</h4>';
+            html += `<p><strong>姓名：</strong>${c.patientName || '-'}</p>`;
+            html += `<p><strong>电话：</strong>${c.patientPhone || '-'}</p>`;
+            html += `<p><strong>身份证：</strong>${c.patientIdCard || '-'}</p>`;
+            html += `<p><strong>就诊时间：</strong>${c.visitDate || '-'} ${c.visitTime || '-'}</p>`;
+            html += `<p><strong>科室：</strong>${c.deptName || '-'} ${c.area || ''} ${c.roomNumber || ''}</p>`;
+            html += '</div>';
+
+            // 患者填写的问诊信息
+            html += '<div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0;">';
+            html += '<h4 style="color: #667eea; margin-bottom: 12px;">📝 患者自述</h4>';
+            html += `<p style="margin-bottom: 8px;"><strong>问诊类型：</strong>${c.formType || '未填写'}</p>`;
+            html += `<p style="margin-bottom: 8px;"><strong>主诉：</strong>${c.chiefComplaint || '未填写'}</p>`;
+            html += `<p style="margin-bottom: 8px;"><strong>现病史：</strong>${c.presentIllness || '未填写'}</p>`;
+            html += `<p style="margin-bottom: 8px;"><strong>既往史：</strong>${c.pastHistory || '未填写'}</p>`;
+            html += '</div>';
+
+            // 已有诊断信息
+            if (c.diagnosis || c.treatment || c.examination) {
+                html += '<div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0;">';
+                html += '<h4 style="color: #27ae60; margin-bottom: 12px;">✅ 已有诊断记录</h4>';
+                if (c.examination) html += `<p style="margin-bottom: 8px;"><strong>检查：</strong>${c.examination}</p>`;
+                if (c.diagnosis) html += `<p style="margin-bottom: 8px;"><strong>诊断：</strong>${c.diagnosis}</p>`;
+                if (c.treatment) html += `<p style="margin-bottom: 8px;"><strong>治疗方案：</strong>${c.treatment}</p>`;
+                html += '</div>';
+            }
+
+            // 医生填写区
+            html += '<div>';
+            html += '<h4 style="color: #e67e22; margin-bottom: 12px;">💊 医生填写</h4>';
+            html += '<div class="form-group"><label>检查</label><textarea id="modalExamination" rows="3" placeholder="请输入检查结果">' + (c.examination || '') + '</textarea></div>';
+            html += '<div class="form-group"><label>诊断结果 *</label><textarea id="modalDiagnosis" rows="3" placeholder="请输入诊断结果">' + (c.diagnosis || '') + '</textarea></div>';
+            html += '<div class="form-group"><label>治疗方案</label><textarea id="modalTreatment" rows="3" placeholder="请输入治疗方案">' + (c.treatment || '') + '</textarea></div>';
+            html += '</div>';
+
+            document.getElementById('consultationModalBody').innerHTML = html;
+        }
+
+        async function saveConsultationFromModal() {
+            if (!consultationModalData || !consultationModalData.appointmentId) {
+                showMessage('数据错误，请重新打开', 'error');
+                return;
+            }
+
+            const diagnosis = document.getElementById('modalDiagnosis').value.trim();
+            const treatment = document.getElementById('modalTreatment').value.trim();
+            const examination = document.getElementById('modalExamination').value.trim();
+
+            if (!diagnosis) {
+                showMessage('请填写诊断结果', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/consultation/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({
+                        appointmentId: consultationModalData.appointmentId,
+                        diagnosis: diagnosis,
+                        treatment: treatment,
+                        examination: examination
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    showMessage('问诊单保存成功，就诊已完成', 'success');
+                    closeConsultationModal();
+                    // 刷新数据
+                    loadTodayAppointments();
+                    loadAppointmentList();
+                    loadWaitingPatients();
+                } else {
+                    showMessage(data.msg || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存问诊单错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
+        }
+
         async function saveDiagnosis() {
             const appointmentId = document.getElementById('currentAppointmentId').value;
             const diagnosis = document.getElementById('diagnosisInput').value.trim();
