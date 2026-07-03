@@ -1,0 +1,41 @@
+<!--pages/consultation-list/consultation-list.wxml-->
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" type="text" placeholder="搜索医生、科室、症状..." value="{{keyword}}" bindinput="onKeywordInput" bindconfirm="doSearch" confirm-type="search" />
+    <button class="search-btn" bindtap="doSearch">搜索</button>
+  </view>
+
+  <!-- 问诊记录列表 -->
+  <scroll-view class="list-scroll" scroll-y="true" refresher-enabled="true" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onRefresh">
+    <view class="record-item" wx:for="{{recordList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.appointmentId}}">
+      <view class="record-header">
+        <text class="doctor-name">{{item.doctorName}}</text>
+        <text class="doctor-dept">{{item.deptName}}</text>
+        <text class="record-status {{item.status === 3 ? 'completed' : item.status === 4 ? 'cancelled' : ''}}">
+          {{item.status === 3 ? '已完成' : item.status === 4 ? '已取消' : '待就诊'}}
+        </text>
+      </view>
+      <view class="record-body">
+        <text class="record-date">{{item.visitDate}} {{item.visitTime}}</text>
+        <text class="record-type" wx:if="{{item.consultationType}}">{{item.consultationType}}</text>
+      </view>
+      <view class="record-complaint" wx:if="{{item.chiefComplaint}}">
+        <text class="complaint-label">主诉：</text>
+        <text class="complaint-text">{{item.chiefComplaint}}</text>
+      </view>
+      <view class="record-diagnosis" wx:if="{{item.diagnosis}}">
+        <text class="diagnosis-label">诊断：</text>
+        <text class="diagnosis-text">{{item.diagnosis}}</text>
+      </view>
+      <view class="record-arrow">›</view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{recordList.length === 0}}">
+      <text class="empty-icon">📄</text>
+      <text class="empty-text">{{keyword ? '未找到匹配的记录' : '暂无问诊记录'}}</text>
+      <button class="btn btn-primary" wx:if="{{!keyword}}" bindtap="goToBooking">去预约</button>
+    </view>
+  </scroll-view>
+</view>

@@ -94,16 +94,15 @@ Page({
     });
   },
 
-  // 跳转到就诊记录
-  goToRecords() {
+  // 跳转到问诊历史
+  goToConsultationHistory() {
     if (!this.data.isLoggedIn) {
       this.goToLogin();
       return;
     }
-    
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+
+    wx.navigateTo({
+      url: '/pages/consultation-list/consultation-list'
     });
   },
 

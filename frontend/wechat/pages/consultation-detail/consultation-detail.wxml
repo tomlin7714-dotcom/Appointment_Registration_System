@@ -1,0 +1,88 @@
+<!--pages/consultation-detail/consultation-detail.wxml-->
+<view class="page-container">
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:else>
+    <!-- 就诊信息卡片 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">🏥 就诊信息</text>
+        <text class="card-status {{detail.status === 3 ? 'completed' : detail.status === 4 ? 'cancelled' : ''}}">
+          {{detail.status === 3 ? '已完成' : detail.status === 4 ? '已取消' : '待就诊'}}
+        </text>
+      </view>
+      <view class="info-row">
+        <text class="label">医生</text>
+        <text class="value">{{detail.doctorName || '-'}} <text class="doctor-title-tag" wx:if="{{detail.doctorTitle}}">{{detail.doctorTitle}}</text></text>
+      </view>
+      <view class="info-row">
+        <text class="label">科室</text>
+        <text class="value">{{detail.deptName || '-'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="label">就诊时间</text>
+        <text class="value">{{detail.visitDate || '-'}} {{detail.visitTime || '-'}}</text>
+      </view>
+    </view>
+
+    <!-- 患者填写信息 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">📝 问诊信息</text>
+      </view>
+      <view class="info-row">
+        <text class="label">问诊类型</text>
+        <text class="value">{{detail.consultationType || '-'}}</text>
+      </view>
+      <view class="info-row multi-line">
+        <text class="label">主诉</text>
+        <text class="value-text">{{detail.chiefComplaint || '未填写'}}</text>
+      </view>
+      <view class="info-row multi-line">
+        <text class="label">就诊史</text>
+        <text class="value-text">{{detail.medicalHistory || '未填写'}}</text>
+      </view>
+      <view class="info-row multi-line">
+        <text class="label">康复史</text>
+        <text class="value-text">{{detail.recoveryHistory || '未填写'}}</text>
+      </view>
+    </view>
+
+    <!-- 医生诊断信息 -->
+    <view class="card" wx:if="{{detail.diagnosis || detail.treatment || detail.doctorAdvice}}">
+      <view class="card-header">
+        <text class="card-title">🔬 诊断结果</text>
+      </view>
+      <view class="info-row multi-line" wx:if="{{detail.diagnosis}}">
+        <text class="label">诊断</text>
+        <text class="value-text">{{detail.diagnosis}}</text>
+      </view>
+      <view class="info-row multi-line" wx:if="{{detail.treatment}}">
+        <text class="label">治疗方案</text>
+        <text class="value-text">{{detail.treatment}}</text>
+      </view>
+      <view class="info-row multi-line" wx:if="{{detail.doctorAdvice}}">
+        <text class="label">医嘱</text>
+        <text class="value-text">{{detail.doctorAdvice}}</text>
+      </view>
+    </view>
+
+    <!-- 患者信息 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">👤 患者信息</text>
+      </view>
+      <view class="info-row">
+        <text class="label">姓名</text>
+        <text class="value">{{detail.patientName || '-'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="label">身份证号</text>
+        <text class="value">{{detail.patientIdCard || '-'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

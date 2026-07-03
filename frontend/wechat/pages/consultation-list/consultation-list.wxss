@@ -1,0 +1,175 @@
+/**pages/consultation-list/consultation-list.wxss**/
+
+.page-container {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+/* 搜索栏 */
+.search-bar {
+  display: flex;
+  padding: 20rpx;
+  background: #fff;
+  gap: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 72rpx;
+  background: #f5f7fa;
+  border-radius: 36rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.search-btn {
+  width: 120rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  padding: 0;
+}
+
+/* 列表 */
+.list-scroll {
+  height: calc(100vh - 120rpx);
+  padding: 20rpx;
+}
+
+.record-item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  position: relative;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.doctor-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.doctor-dept {
+  font-size: 24rpx;
+  color: #667eea;
+  background: #f0f4ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-right: auto;
+}
+
+.record-status {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.record-status.completed {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.record-status.cancelled {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.record-body {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.record-date {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.record-type {
+  font-size: 22rpx;
+  color: #ff6b6b;
+  background: #fff5f5;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.record-complaint,
+.record-diagnosis {
+  font-size: 26rpx;
+  margin-bottom: 8rpx;
+  display: flex;
+}
+
+.complaint-label,
+.diagnosis-label {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.complaint-text,
+.diagnosis-text {
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-arrow {
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 40rpx;
+}
+
+.btn {
+  min-width: 200rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}

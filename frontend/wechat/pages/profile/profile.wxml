@@ -56,11 +56,11 @@
       <text class="menu-arrow">></text>
     </view>
     
-    <view class="menu-item" bindtap="goToRecords">
+    <view class="menu-item" bindtap="goToConsultationHistory">
       <view class="menu-icon" style="background: #f3e5f5;">📄</view>
       <view class="menu-content">
-        <text class="menu-title">就诊记录</text>
-        <text class="menu-desc">历史就诊信息</text>
+        <text class="menu-title">问诊历史</text>
+        <text class="menu-desc">查看问诊记录和诊断结果</text>
       </view>
       <text class="menu-arrow">></text>
     </view>

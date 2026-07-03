@@ -10,7 +10,9 @@
     "pages/appointment-list/appointment-list",
     "pages/profile/profile",
     "pages/edit-profile/edit-profile",
-    "pages/booking/booking"
+    "pages/booking/booking",
+    "pages/consultation-list/consultation-list",
+    "pages/consultation-detail/consultation-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",
