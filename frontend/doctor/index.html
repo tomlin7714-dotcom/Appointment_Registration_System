@@ -753,6 +753,40 @@
                         <div style="text-align: center; color: #999;">点击"叫下一个"开始叫号</div>
                     </div>
                 </div>
+
+                <!-- 问诊单 -->
+                <div class="card" id="consultationCard" style="display: none;">
+                    <div class="card-header">
+                        <span class="card-title">📋 问诊单</span>
+                        <button class="btn btn-primary" onclick="refreshConsultation()" style="padding: 5px 10px; font-size: 12px;">刷新</button>
+                    </div>
+                    <div id="consultationContent">
+                        <div style="text-align: center; color: #999; padding: 20px;">点击"叫下一个"加载问诊信息</div>
+                    </div>
+                </div>
+
+                <!-- 诊断填写 -->
+                <div class="card" id="diagnosisCard" style="display: none;">
+                    <div class="card-header">
+                        <span class="card-title">💊 诊断填写</span>
+                    </div>
+                    <form id="diagnosisForm">
+                        <input type="hidden" id="currentAppointmentId">
+                        <div class="form-group">
+                            <label>诊断结果</label>
+                            <textarea id="diagnosisInput" rows="3" placeholder="请输入诊断结果"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>治疗方案</label>
+                            <textarea id="treatmentInput" rows="3" placeholder="请输入治疗方案"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>医嘱</label>
+                            <textarea id="adviceInput" rows="3" placeholder="请输入医嘱"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="saveDiagnosis()">💾 保存问诊单并完成就诊</button>
+                    </form>
+                </div>
             </div>
 
             <!-- 个人信息页面 -->
@@ -1804,6 +1838,9 @@
             document.getElementById('currentDept').textContent = currentPatient.deptName || '-';
             document.getElementById('currentLocation').textContent = currentPatient.area && currentPatient.roomNumber ? `${currentPatient.area}${currentPatient.deptName}${currentPatient.roomNumber}诊室` : '-';
             
+            // 加载问诊单
+            loadConsultation(currentPatient.id);
+
             fetch(`${API_BASE_URL}/api/doctor/call/start`, {
                 method: 'POST',
                 headers: {
@@ -1818,7 +1855,7 @@
                     currentPatient.status = 2;
                 }
             });
-            
+
             if ('speechSynthesis' in window) {
                 const location = currentPatient.area && currentPatient.roomNumber ? `${currentPatient.area}${currentPatient.deptName}${currentPatient.roomNumber}诊室` : '诊室';
                 const utterance = new SpeechSynthesisUtterance(`请${currentNum}号，${currentPatient.patientName}患者到${location}就诊`);
@@ -1858,6 +1895,137 @@
             if (currentIndex < appointmentList.length - 1) {
                 currentIndex++;
                 updateWaitingList();
+            }
+        }
+
+        // ==================== 问诊单 ====================
+
+        // 加载问诊单（在叫号时自动调用）
+        async function loadConsultation(appointmentId) {
+            if (!appointmentId) return;
+
+            document.getElementById('currentAppointmentId').value = appointmentId;
+
+            try {
+                const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+                const response = await fetch(`${API_BASE_URL}/api/doctor/consultation/get?appointmentId=${appointmentId}`, {
+                    headers: {
+                        'token': localStorage.getItem('doctorToken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    const c = data.data;
+                    let html = '';
+
+                    // 患者问诊信息
+                    if (c.consultationType || c.chiefComplaint || c.medicalHistory || c.recoveryHistory) {
+                        html += '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0;">';
+                        html += '<h4 style="margin-bottom: 12px; color: #667eea;">患者自述</h4>';
+                        if (c.consultationType) html += `<p style="margin-bottom: 8px;"><strong>问诊类型：</strong>${c.consultationType}</p>`;
+                        if (c.chiefComplaint) html += `<p style="margin-bottom: 8px;"><strong>主诉：</strong>${c.chiefComplaint}</p>`;
+                        if (c.medicalHistory) html += `<p style="margin-bottom: 8px;"><strong>就诊史：</strong>${c.medicalHistory}</p>`;
+                        if (c.recoveryHistory) html += `<p style="margin-bottom: 8px;"><strong>康复史：</strong>${c.recoveryHistory}</p>`;
+                        html += '</div>';
+                    } else {
+                        html += '<p style="color: #999; margin-bottom: 16px;">患者未填写问诊信息</p>';
+                    }
+
+                    // 已有诊断信息
+                    if (c.diagnosis || c.treatment || c.doctorAdvice) {
+                        html += '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0;">';
+                        html += '<h4 style="margin-bottom: 12px; color: #27ae60;">已保存的诊断</h4>';
+                        if (c.diagnosis) html += `<p style="margin-bottom: 8px;"><strong>诊断：</strong>${c.diagnosis}</p>`;
+                        if (c.treatment) html += `<p style="margin-bottom: 8px;"><strong>治疗方案：</strong>${c.treatment}</p>`;
+                        if (c.doctorAdvice) html += `<p style="margin-bottom: 8px;"><strong>医嘱：</strong>${c.doctorAdvice}</p>`;
+                        html += '</div>';
+
+                        // 回填诊断表单
+                        document.getElementById('diagnosisInput').value = c.diagnosis || '';
+                        document.getElementById('treatmentInput').value = c.treatment || '';
+                        document.getElementById('adviceInput').value = c.doctorAdvice || '';
+                    } else {
+                        document.getElementById('diagnosisInput').value = '';
+                        document.getElementById('treatmentInput').value = '';
+                        document.getElementById('adviceInput').value = '';
+                    }
+
+                    document.getElementById('consultationContent').innerHTML = html;
+                    document.getElementById('consultationCard').style.display = 'block';
+                    document.getElementById('diagnosisCard').style.display = 'block';
+                } else {
+                    document.getElementById('consultationContent').innerHTML = '<p style="color: #999;">暂无问诊信息</p>';
+                    document.getElementById('consultationCard').style.display = 'block';
+                    document.getElementById('diagnosisCard').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载问诊单错误:', error);
+                document.getElementById('consultationContent').innerHTML = '<p style="color: #e74c3c;">加载失败</p>';
+            }
+        }
+
+        // 刷新问诊单
+        function refreshConsultation() {
+            const appointmentId = document.getElementById('currentAppointmentId').value;
+            if (appointmentId) {
+                loadConsultation(appointmentId);
+            }
+        }
+
+        // 保存诊断并完成就诊
+        async function saveDiagnosis() {
+            const appointmentId = document.getElementById('currentAppointmentId').value;
+            const diagnosis = document.getElementById('diagnosisInput').value.trim();
+            const treatment = document.getElementById('treatmentInput').value.trim();
+            const doctorAdvice = document.getElementById('adviceInput').value.trim();
+
+            if (!appointmentId) {
+                showMessage('请先选择患者', 'error');
+                return;
+            }
+
+            if (!diagnosis) {
+                showMessage('请填写诊断结果', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/consultation/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({
+                        appointmentId: parseInt(appointmentId),
+                        diagnosis: diagnosis,
+                        treatment: treatment,
+                        doctorAdvice: doctorAdvice
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    showMessage('问诊单保存成功，就诊已完成', 'success');
+                    // 刷新数据
+                    loadTodayAppointments();
+                    loadAppointmentList();
+                    loadWaitingPatients();
+                    // 清空诊断表单
+                    document.getElementById('diagnosisInput').value = '';
+                    document.getElementById('treatmentInput').value = '';
+                    document.getElementById('adviceInput').value = '';
+                    document.getElementById('consultationCard').style.display = 'none';
+                    document.getElementById('diagnosisCard').style.display = 'none';
+                } else {
+                    showMessage(data.msg || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存诊断错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
             }
         }
     </script>
