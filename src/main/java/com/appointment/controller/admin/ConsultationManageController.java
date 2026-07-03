@@ -132,7 +132,7 @@ public class ConsultationManageController {
         m.put("treatment", cf.getTreatment());
         m.put("examination", cf.getExamination());
         m.put("status", cf.getStatus());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         m.put("createTime", cf.getCreateTime() != null ? sdf.format(cf.getCreateTime()) : "");
         return m;
     }
