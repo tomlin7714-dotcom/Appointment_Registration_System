@@ -31,7 +31,8 @@
             <view class="recommend-list">
               <view class="recommend-item" wx:for="{{item.depts}}" wx:key="deptId" bindtap="bookDept" data-deptid="{{item.deptId}}" data-deptname="{{item.deptName}}">
                 <text class="recommend-name">{{item.deptName}}</text>
-                <text class="recommend-arrow">立即预约 ></text>
+                <text class="recommend-arrow" wx:if="{{item.deptId}}">立即预约 ></text>
+                <text class="recommend-hint" wx:else>（建议就诊科室）</text>
               </view>
             </view>
           </view>

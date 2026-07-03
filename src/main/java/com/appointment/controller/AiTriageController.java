@@ -124,19 +124,26 @@ public class AiTriageController {
             List<Map<String, Object>> deptResult = new ArrayList<>();
 
             if (deptNames != null) {
+                // 按名称长度排序，长名称优先匹配（避免"呼吸内科"被"内科"抢匹配）
+                List<Dept> sortedDepts = new ArrayList<>(allDepts);
+                sortedDepts.sort((a, b) -> b.getDeptName().length() - a.getDeptName().length());
+
                 for (Map<String, String> d : deptNames) {
                     String name = d.get("name");
-                    for (Dept dept : allDepts) {
-                        if (dept.getDeptName().contains(name) || name.contains(dept.getDeptName())) {
-                            Map<String, Object> item = new HashMap<>();
-                            item.put("deptId", dept.getId());
-                            item.put("deptName", dept.getDeptName());
-                            deptResult.add(item);
+                    Dept matched = null;
+                    for (Dept dept : sortedDepts) {
+                        if (dept.getDeptName().equals(name) || name.contains(dept.getDeptName())) {
+                            matched = dept;
                             break;
                         }
                     }
-                    // 未匹配到已知科室也展示
-                    if (deptResult.stream().noneMatch(item -> item.get("deptName").equals(name))) {
+                    if (matched != null) {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("deptId", matched.getId());
+                        item.put("deptName", matched.getDeptName());
+                        deptResult.add(item);
+                    } else {
+                        // 未匹配到已知科室也展示（deptId=null，前端不可点击）
                         Map<String, Object> item = new HashMap<>();
                         item.put("deptId", null);
                         item.put("deptName", name);

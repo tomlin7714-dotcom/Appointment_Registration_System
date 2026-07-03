@@ -98,6 +98,10 @@ Page({
 
   bookDept(e) {
     const deptId = e.currentTarget.dataset.deptid;
+    if (!deptId) {
+      wx.showToast({ title: '暂不支持直接预约该科室', icon: 'none' });
+      return;
+    }
     wx.navigateTo({
       url: `/pages/booking/booking?deptId=${deptId}`
     });

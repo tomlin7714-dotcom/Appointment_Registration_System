@@ -131,6 +131,11 @@
   color: #667eea;
 }
 
+.recommend-hint {
+  font-size: 22rpx;
+  color: #999;
+}
+
 /* 快捷症状 */
 .quick-symptoms {
   padding: 20rpx;
