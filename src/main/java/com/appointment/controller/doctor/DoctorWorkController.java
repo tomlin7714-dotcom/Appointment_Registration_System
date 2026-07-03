@@ -938,6 +938,16 @@ public class DoctorWorkController {
                 return ResponseVo.error(404, "预约不存在");
             }
 
+            // 从排班获取医生ID
+            Integer doctorId = null;
+            NumberSource ns = numberSourceMapper.selectById(appointment.getNumberSourceId());
+            if (ns != null) {
+                Schedule schedule = scheduleMapper.selectById(ns.getScheduleId());
+                if (schedule != null) {
+                    doctorId = schedule.getDoctorId();
+                }
+            }
+
             // 查找或创建问诊单
             ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
             if (form == null) {
@@ -946,6 +956,7 @@ public class DoctorWorkController {
                 form.setConsultationNo("CF" + sdf.format(new Date()));
                 form.setAppointmentId(appointmentId);
                 form.setUserId(appointment.getUserId());
+                form.setDoctorId(doctorId);
                 form.setDiagnosis(diagnosis);
                 form.setTreatment(treatment);
                 form.setExamination(examination);
@@ -956,6 +967,9 @@ public class DoctorWorkController {
                 form.setTreatment(treatment);
                 form.setExamination(examination);
                 form.setStatus(1); // 已完成
+                if (form.getDoctorId() == null) {
+                    form.setDoctorId(doctorId);
+                }
                 consultationFormMapper.update(form);
             }
 
