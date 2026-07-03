@@ -685,30 +685,36 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">全部预约</span>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" id="appointmentSearch" placeholder="搜索患者姓名或手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 180px;">
-                            <input type="date" id="filterDate" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
-                            <select id="filterStatus" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
-                                <option value="">全部状态</option>
-                                <option value="1">待就诊</option>
-                                <option value="3">已完成</option>
-                                <option value="4">已取消</option>
-                            </select>
-                            <button class="btn btn-primary" onclick="filterAppointments()" style="padding: 8px 16px;">筛选</button>
+                        <span class="card-title">查询条件</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>挂号编号</label>
+                            <input type="text" id="appointmentIdSearch" placeholder="输入挂号编号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 150px;">
                         </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>患者姓名</label>
+                            <input type="text" id="appointmentNameSearch" placeholder="输入患者姓名" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 150px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="filterAppointments()" style="height: 40px;">查询</button>
+                        <button class="btn" onclick="resetAppointmentSearch()" style="height: 40px; background: #f0f0f0; color: #666;">重置</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">预约列表</span>
                     </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>预约号</th>
+                                    <th style="width: 60px;">序号</th>
+                                    <th>挂号编号</th>
                                     <th>患者姓名</th>
-                                    <th>手机号</th>
-                                    <th>预约日期</th>
-                                    <th>时间段</th>
-                                    <th>状态</th>
-                                    <th>操作</th>
+                                    <th>医生姓名</th>
+                                    <th>预约时间</th>
+                                    <th>预约状态</th>
+                                    <th style="width: 200px;">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="appointmentBody">
@@ -948,7 +954,7 @@
         let numberSourcePage = 1;
         let numberSourcePageSize = 10;
         let appointmentPage = 1;
-        let appointmentPageSize = 10;
+        let appointmentPageSize = 9;
         
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', function() {
@@ -1659,30 +1665,18 @@
         
         async function loadAppointmentList() {
             const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
-            const keyword = document.getElementById('appointmentSearch')?.value || '';
-            const date = document.getElementById('filterDate')?.value || '';
-            const status = document.getElementById('filterStatus')?.value || '';
-            
+            const idSearch = document.getElementById('appointmentIdSearch')?.value || '';
+            const nameSearch = document.getElementById('appointmentNameSearch')?.value || '';
+
             let url = `${API_BASE_URL}/api/doctor/appointment/list?doctorId=${doctorInfo.id}&page=${appointmentPage}&pageSize=${appointmentPageSize}`;
-            if (keyword) {
-                url += `&keyword=${encodeURIComponent(keyword)}`;
-            }
-            if (date) {
-                url += `&date=${date}`;
-            }
-            if (status) {
-                url += `&status=${status}`;
-            }
-            
+            if (idSearch) url += `&appointmentId=${encodeURIComponent(idSearch)}`;
+            if (nameSearch) url += `&keyword=${encodeURIComponent(nameSearch)}`;
+
             try {
                 const response = await fetch(url, {
-                    headers: {
-                        'token': localStorage.getItem('doctorToken')
-                    }
+                    headers: { 'token': localStorage.getItem('doctorToken') }
                 });
-                
                 const data = await response.json();
-                
                 if (data.code === 200) {
                     renderAppointmentTable(data.data.list);
                     renderPagination('appointment', data.data.total, data.data.page, data.data.pageSize);
@@ -1694,39 +1688,200 @@
                 showMessage('网络错误，请稍后重试', 'error');
             }
         }
-        
+
         function renderAppointmentTable(appointments) {
             const tbody = document.getElementById('appointmentBody');
             tbody.innerHTML = '';
-            
+
             if (appointments.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无预约记录</td></tr>';
                 return;
             }
-            
-            appointments.forEach(app => {
-                const statusMap = { 0: '待支付', 1: '待就诊', 2: '就诊中', 3: '已完成', 4: '已取消' };
+
+            const statusMap = { 0: '待支付', 1: '待就诊', 2: '就诊中', 3: '已完成', 4: '已取消' };
+
+            appointments.forEach((app, index) => {
                 const statusText = statusMap[app.status] || '未知';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td>${(appointmentPage - 1) * appointmentPageSize + index + 1}</td>
                     <td>${app.id}</td>
-                    <td>${app.patientName}</td>
-                    <td>${app.phone || '-'}</td>
-                    <td>${app.visitDate || '-'}</td>
-                    <td>${app.visitTime || '-'}</td>
-                    <td>${statusText}</td>
+                    <td>${app.patientName || '-'}</td>
+                    <td>${app.doctorName || '-'}</td>
+                    <td>${app.visitDate || '-'} ${app.visitTime || ''}</td>
+                    <td><span style="color: ${app.status === 3 ? '#27ae60' : app.status === 4 ? '#e74c3c' : app.status === 1 ? '#1976d2' : '#999'}">${statusText}</span></td>
                     <td>
-                        ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="startConsultation(${app.id})">开始就诊</button>` : ''}
-                        ${app.status === 1 || app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="openConsultationModal(${app.id})">问诊</button>` : ''}
-                        ${app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="completeAppointment(${app.id})">完成就诊</button>` : ''}
-                        ${app.status === 3 ? `<button class="btn btn-default" style="padding: 5px 10px; font-size: 12px; background: #e8f5e9; color: #388e3c;" onclick="openConsultationModal(${app.id})">查看</button>` : ''}
-                        ${app.status !== 1 && app.status !== 2 && app.status !== 3 ? '-' : ''}
+                        <button class="btn btn-success" style="padding: 4px 8px; font-size: 12px;" onclick="viewAppointmentDetail(${app.id})">详情</button>
+                        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="editAppointment(${app.id})">编辑</button>
+                        ${app.status === 1 || app.status === 0 ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="cancelAppointmentByDoctor(${app.id})">取消</button>` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
-        
+
+        function filterAppointments() {
+            appointmentPage = 1;
+            loadAppointmentList();
+        }
+
+        function resetAppointmentSearch() {
+            document.getElementById('appointmentIdSearch').value = '';
+            document.getElementById('appointmentNameSearch').value = '';
+            appointmentPage = 1;
+            loadAppointmentList();
+        }
+
+        // 预约详情弹窗
+        function viewAppointmentDetail(id) {
+            fetch(`${API_BASE_URL}/api/user/appointment/detail?appointmentId=${id}`, {
+                headers: { 'token': localStorage.getItem('doctorToken') }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const a = data.data;
+                    const statusMap = { 0: '待支付', 1: '待就诊', 2: '就诊中', 3: '已完成', 4: '已取消' };
+                    const html = `
+                        <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+                            <p><strong>挂号编号：</strong>${a.id}</p>
+                            <p><strong>患者姓名：</strong>${a.patientName || '-'}</p>
+                            <p><strong>身份证号：</strong>${a.patientIdCard || '-'}</p>
+                            <p><strong>挂号费用：</strong>¥${a.fee || 0}</p>
+                        </div>
+                        <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+                            <p><strong>医生姓名：</strong>${a.doctorName || '-'} ${a.doctorTitle || ''}</p>
+                            <p><strong>科室：</strong>${a.deptName || '-'}</p>
+                            <p><strong>就诊地点：</strong>${a.area || ''} ${a.deptName || ''} ${a.roomNumber || ''}诊室</p>
+                            <p><strong>就诊时间：</strong>${a.visitDate || '-'} ${a.visitTime || '-'}</p>
+                        </div>
+                        <div>
+                            <p><strong>状态：</strong><span style="color: ${a.status === 3 ? '#27ae60' : a.status === 4 ? '#e74c3c' : '#1976d2'}">${statusMap[a.status] || '未知'}</span></p>
+                            <p><strong>预约时间：</strong>${a.appointmentTime || '-'}</p>
+                            <p><strong>支付时间：</strong>${a.payTime || '-'}</p>
+                        </div>
+                    `;
+                    showModalDialog('预约详情', html);
+                } else {
+                    showMessage(data.msg || '获取详情失败', 'error');
+                }
+            })
+            .catch(e => { console.error(e); showMessage('网络错误', 'error'); });
+        }
+
+        // 通用弹窗
+        function showModalDialog(title, content) {
+            const existing = document.getElementById('dynamicModal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.id = 'dynamicModal';
+            modal.innerHTML = `
+                <div class="modal-content" style="width: 500px;">
+                    <div class="modal-header">
+                        <span class="modal-title">${title}</span>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">${content}</div>
+                    <div class="modal-footer">
+                        <button class="btn" onclick="this.closest('.modal').remove()" style="background: #e0e0e0; color: #333;">关闭</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 编辑预约弹窗
+        function editAppointment(id) {
+            fetch(`${API_BASE_URL}/api/user/appointment/detail?appointmentId=${id}`, {
+                headers: { 'token': localStorage.getItem('doctorToken') }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const a = data.data;
+                    const statusMap = { 0: '待支付', 1: '待就诊', 2: '就诊中', 3: '已完成', 4: '已取消' };
+                    const html = `
+                        <input type="hidden" id="editApptId" value="${a.id}">
+                        <div class="form-group"><label>挂号编号</label><input type="text" value="${a.id}" readonly style="background:#f5f5f5;padding:8px;border:1px solid #e0e0e0;border-radius:5px;width:100%;"></div>
+                        <div class="form-group"><label>患者姓名</label><input type="text" id="editApptPatientName" value="${a.patientName || ''}" style="padding:8px;border:2px solid #e0e0e0;border-radius:5px;width:100%;"></div>
+                        <div class="form-group"><label>身份证号</label><input type="text" id="editApptIdCard" value="${a.patientIdCard || ''}" style="padding:8px;border:2px solid #e0e0e0;border-radius:5px;width:100%;"></div>
+                        <div class="form-group"><label>状态</label>
+                            <select id="editApptStatus" style="padding:8px;border:2px solid #e0e0e0;border-radius:5px;width:100%;">
+                                <option value="0" ${a.status === 0 ? 'selected' : ''}>待支付</option>
+                                <option value="1" ${a.status === 1 ? 'selected' : ''}>待就诊</option>
+                                <option value="2" ${a.status === 2 ? 'selected' : ''}>就诊中</option>
+                                <option value="3" ${a.status === 3 ? 'selected' : ''}>已完成</option>
+                                <option value="4" ${a.status === 4 ? 'selected' : ''}>已取消</option>
+                            </select>
+                        </div>
+                    `;
+                    showModalWithBtn('编辑预约', html, '保存修改', async function() {
+                        const patientName = document.getElementById('editApptPatientName').value.trim();
+                        const idCard = document.getElementById('editApptIdCard').value.trim();
+                        const status = parseInt(document.getElementById('editApptStatus').value);
+                        if (!patientName) { showMessage('请输入患者姓名', 'error'); return; }
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/api/doctor/appointment/update`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'token': localStorage.getItem('doctorToken') },
+                                body: JSON.stringify({ id, patientName, patientIdCard: idCard, status })
+                            });
+                            const d = await res.json();
+                            if (d.code === 200) {
+                                showMessage('修改成功', 'success');
+                                document.getElementById('dynamicModal').remove();
+                                loadAppointmentList();
+                            } else { showMessage(d.msg || '修改失败', 'error'); }
+                        } catch(e) { showMessage('网络错误', 'error'); }
+                    });
+                } else { showMessage(data.msg || '获取失败', 'error'); }
+            })
+            .catch(e => { console.error(e); showMessage('网络错误', 'error'); });
+        }
+
+        function showModalWithBtn(title, content, btnText, btnCallback) {
+            const existing = document.getElementById('dynamicModal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.id = 'dynamicModal';
+            modal.innerHTML = `
+                <div class="modal-content" style="width: 500px;">
+                    <div class="modal-header">
+                        <span class="modal-title">${title}</span>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">${content}</div>
+                    <div class="modal-footer">
+                        <button class="btn" onclick="this.closest('.modal').remove()" style="background:#e0e0e0;color:#333;">取消</button>
+                        <button class="btn btn-primary" id="modalConfirmBtn">${btnText}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('modalConfirmBtn').onclick = btnCallback;
+        }
+
+        // 医生取消预约
+        async function cancelAppointmentByDoctor(id) {
+            if (!confirm('确定要取消该预约吗？')) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/doctor/appointment/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'token': localStorage.getItem('doctorToken') },
+                    body: JSON.stringify({ appointmentId: id })
+                });
+                const data = await res.json();
+                if (data.code === 200) {
+                    showMessage('取消成功', 'success');
+                    loadAppointmentList();
+                } else { showMessage(data.msg || '取消失败', 'error'); }
+            } catch(e) { showMessage('网络错误', 'error'); }
+        }
+
         function startConsultation(id) {
             fetch(`${API_BASE_URL}/api/doctor/call/start`, {
                 method: 'POST',

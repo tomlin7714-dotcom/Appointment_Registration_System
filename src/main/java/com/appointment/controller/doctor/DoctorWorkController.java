@@ -239,12 +239,12 @@ public class DoctorWorkController {
     @GetMapping("/appointment/list")
     public ResponseVo getAppointmentList(@RequestParam Integer doctorId,
                                          @RequestParam(required = false, defaultValue = "1") Integer page,
-                                         @RequestParam(required = false, defaultValue = "10") Integer pageSize,
-                                         @RequestParam(required = false) String date,
-                                         @RequestParam(required = false) Integer status,
-                                         @RequestParam(required = false) String keyword) {
+                                         @RequestParam(required = false, defaultValue = "9") Integer pageSize,
+                                         @RequestParam(required = false) String keyword,
+                                         @RequestParam(required = false) String appointmentId) {
         List<Appointment> appointments = appointmentMapper.selectByDoctorId(doctorId);
-        
+        Doctor currentDoctor = doctorMapper.selectById(doctorId);
+
         List<Map<String, Object>> result = new ArrayList<>();
         for (Appointment appointment : appointments) {
             NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
@@ -253,22 +253,15 @@ public class DoctorWorkController {
             Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
             if (schedule == null) continue;
 
-            if (date != null && !date.isEmpty() && !schedule.getVisitDate().equals(date)) {
-                continue;
+            // 按挂号编号筛选
+            if (appointmentId != null && !appointmentId.isEmpty()) {
+                if (!appointment.getId().toString().contains(appointmentId)) continue;
             }
 
-            if (status != null && !appointment.getStatus().equals(status)) {
-                continue;
-            }
-
-            // 模糊查询
+            // 按患者姓名筛选
             if (keyword != null && !keyword.isEmpty()) {
                 boolean nameMatch = appointment.getPatientName() != null && appointment.getPatientName().contains(keyword);
-                User user = userMapper.selectById(appointment.getUserId());
-                boolean phoneMatch = user != null && user.getPhone() != null && user.getPhone().contains(keyword);
-                if (!nameMatch && !phoneMatch) {
-                    continue;
-                }
+                if (!nameMatch) continue;
             }
 
             Map<String, Object> item = new HashMap<>();
@@ -281,11 +274,11 @@ public class DoctorWorkController {
             item.put("payTime", appointment.getPayTime());
             item.put("visitDate", schedule.getVisitDate());
             item.put("visitTime", schedule.getVisitTime());
+            item.put("doctorName", currentDoctor != null ? currentDoctor.getName() : "");
+            item.put("doctorTitle", currentDoctor != null ? currentDoctor.getTitle() : "");
 
             User user = userMapper.selectById(appointment.getUserId());
-            if (user != null) {
-                item.put("phone", user.getPhone());
-            }
+            item.put("phone", user != null ? user.getPhone() : "");
 
             Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
             if (doctor != null) {
@@ -304,18 +297,15 @@ public class DoctorWorkController {
         result.sort((a, b) -> {
             String dateA = (String) a.get("visitDate");
             String dateB = (String) b.get("visitDate");
-            if (dateA != null && dateB != null) {
-                return dateB.compareTo(dateA);
-            }
+            if (dateA != null && dateB != null) return dateB.compareTo(dateA);
             return 0;
         });
 
-        // 分页处理
         int total = result.size();
         int start = (page - 1) * pageSize;
         int end = Math.min(start + pageSize, total);
         List<Map<String, Object>> paginatedResult = start < total ? result.subList(start, end) : new ArrayList<>();
-        
+
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("list", paginatedResult);
         responseData.put("total", total);
@@ -986,6 +976,51 @@ public class DoctorWorkController {
             e.printStackTrace();
             return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/appointment/update")
+    public ResponseVo updateAppointment(@RequestBody Map<String, Object> params) {
+        Integer id = parseInteger(params.get("id"));
+        String patientName = (String) params.get("patientName");
+        String patientIdCard = (String) params.get("patientIdCard");
+        Integer status = parseInteger(params.get("status"));
+
+        if (id == null) return ResponseVo.error(400, "参数错误");
+
+        Appointment appointment = appointmentMapper.selectById(id);
+        if (appointment == null) return ResponseVo.error(404, "预约不存在");
+
+        if (patientName != null && !patientName.isEmpty()) appointment.setPatientName(patientName);
+        if (patientIdCard != null && !patientIdCard.isEmpty()) appointment.setPatientIdCard(patientIdCard);
+        if (status != null) appointment.setStatus(status);
+
+        appointmentMapper.update(appointment);
+        return ResponseVo.success();
+    }
+
+    @PostMapping("/appointment/cancel")
+    public ResponseVo cancelAppointment(@RequestBody Map<String, Object> params) {
+        Integer appointmentId = parseInteger(params.get("appointmentId"));
+        if (appointmentId == null) return ResponseVo.error(400, "参数错误");
+
+        Appointment appointment = appointmentMapper.selectById(appointmentId);
+        if (appointment == null) return ResponseVo.error(404, "预约不存在");
+
+        if (appointment.getStatus() == 3) {
+            return ResponseVo.error(400, "已完成预约无法取消");
+        }
+
+        appointment.setStatus(4);
+        appointmentMapper.update(appointment);
+
+        // 释放号源
+        NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
+        if (source != null) {
+            source.setRemainNum(source.getRemainNum() + 1);
+            numberSourceMapper.update(source);
+        }
+
+        return ResponseVo.success();
     }
 
     private Integer parseInteger(Object obj) {
