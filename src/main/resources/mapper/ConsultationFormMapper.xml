@@ -93,8 +93,13 @@
     </insert>
 
     <select id="selectAll" resultMap="DetailResultMap">
-        SELECT cf.*, u.real_name AS patient_name, d.name AS doctor_name, d.title AS doctor_title,
-               dp.dept_name, s.visit_date, s.visit_time
+        SELECT cf.*,
+               COALESCE(u.real_name, a.patient_name) AS patient_name,
+               COALESCE(a.patient_id_card, '') AS patient_id_card,
+               COALESCE(d.name, doc2.name) AS doctor_name,
+               COALESCE(d.title, doc2.title) AS doctor_title,
+               COALESCE(dp.dept_name, dp2.dept_name) AS dept_name,
+               s.visit_date, s.visit_time
         FROM consultation_form cf
         LEFT JOIN user u ON cf.user_id = u.id
         LEFT JOIN doctor d ON cf.doctor_id = d.id
@@ -102,6 +107,8 @@
         LEFT JOIN appointment a ON cf.appointment_id = a.id
         LEFT JOIN number_source ns ON a.number_source_id = ns.id
         LEFT JOIN schedule s ON ns.schedule_id = s.id
+        LEFT JOIN doctor doc2 ON s.doctor_id = doc2.id
+        LEFT JOIN dept dp2 ON doc2.dept_id = dp2.id
         ORDER BY cf.create_time DESC
     </select>
 
