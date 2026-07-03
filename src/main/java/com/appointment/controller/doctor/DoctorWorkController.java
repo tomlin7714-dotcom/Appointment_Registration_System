@@ -973,20 +973,6 @@ public class DoctorWorkController {
             return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
         }
     }
-            form.setDoctorAdvice(doctorAdvice);
-            consultationFormMapper.update(form);
-        }
-
-        // 更新预约状态为已完成
-        appointment.setStatus(3);
-        appointmentMapper.update(appointment);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("appointmentId", appointmentId);
-        result.put("status", 3);
-
-        return ResponseVo.success(result);
-    }
 
     private Integer parseInteger(Object obj) {
         if (obj == null) return null;
