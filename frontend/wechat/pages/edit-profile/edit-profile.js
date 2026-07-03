@@ -63,9 +63,11 @@ Page({
               const data = JSON.parse(uploadRes.data);
               if (data.code === 200) {
                 const avatarUrl = app.globalData.apiBaseUrl + data.data.avatarUrl;
-                this.setData({
-                  'userInfo.avatar': avatarUrl
-                });
+                // 更新页面数据和本地存储
+                const updatedInfo = { ...this.data.userInfo, avatar: avatarUrl };
+                this.setData({ userInfo: updatedInfo });
+                wx.setStorageSync('userInfo', updatedInfo);
+                app.globalData.userInfo = updatedInfo;
                 wx.showToast({ title: '头像上传成功', icon: 'success' });
               } else {
                 wx.showToast({ title: data.msg || '上传失败', icon: 'none' });
