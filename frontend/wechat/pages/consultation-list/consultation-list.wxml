@@ -12,8 +12,8 @@
       <view class="record-header">
         <text class="doctor-name">{{item.doctorName}}</text>
         <text class="doctor-dept">{{item.deptName}}</text>
-        <text class="record-status {{item.status === 3 ? 'completed' : item.status === 4 ? 'cancelled' : ''}}">
-          {{item.status === 3 ? '已完成' : item.status === 4 ? '已取消' : '待就诊'}}
+        <text class="record-status {{item.appointmentStatus === 3 ? 'completed' : item.appointmentStatus === 4 ? 'cancelled' : ''}}">
+          {{item.appointmentStatus === 3 ? '已完成' : item.appointmentStatus === 4 ? '已取消' : '待就诊'}}
         </text>
       </view>
       <view class="record-body">

@@ -10,8 +10,8 @@
     <view class="card">
       <view class="card-header">
         <text class="card-title">🏥 就诊信息</text>
-        <text class="card-status {{detail.status === 3 ? 'completed' : detail.status === 4 ? 'cancelled' : ''}}">
-          {{detail.status === 3 ? '已完成' : detail.status === 4 ? '已取消' : '待就诊'}}
+        <text class="card-status {{detail.appointmentStatus === 3 ? 'completed' : detail.appointmentStatus === 4 ? 'cancelled' : ''}}">
+          {{detail.appointmentStatus === 3 ? '已完成' : detail.appointmentStatus === 4 ? '已取消' : '待就诊'}}
         </text>
       </view>
       <view class="info-row">
