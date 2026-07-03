@@ -78,6 +78,7 @@ public class DoctorController {
                 doctorMap.put("name", doctor.getName());
                 doctorMap.put("doctorAccount", doctor.getWorkNo());
                 doctorMap.put("deptId", doctor.getDeptId());
+                doctorMap.put("gender", doctor.getGender());
                 doctorMap.put("title", doctor.getTitle());
                 doctorMap.put("phone", doctor.getPhone());
                 doctorMap.put("status", doctor.getStatus());
@@ -117,6 +118,7 @@ public class DoctorController {
         String doctorAccount = (String) params.get("doctorAccount");
         String pwd = (String) params.get("pwd");
         Integer deptId = parseInteger(params.get("deptId"));
+        String gender = (String) params.get("gender");
         String title = (String) params.get("title");
         String phone = (String) params.get("phone");
         String remark = (String) params.get("remark");
@@ -145,7 +147,7 @@ public class DoctorController {
         doctor.setPhone(phone != null ? phone : "");
         doctor.setIntro(remark != null ? remark : "");
         doctor.setSpecialty("");
-        doctor.setGender("男");
+        doctor.setGender(gender != null && !gender.isEmpty() ? gender : "男");
         doctor.setStatus(0);
 
         doctorMapper.insert(doctor);
@@ -183,6 +185,7 @@ public class DoctorController {
         String name = (String) params.get("name");
         String pwd = (String) params.get("pwd");
         Integer deptId = parseInteger(params.get("deptId"));
+        String gender = (String) params.get("gender");
         String title = (String) params.get("title");
         String phone = (String) params.get("phone");
         String remark = (String) params.get("remark");
@@ -211,6 +214,9 @@ public class DoctorController {
         }
         if (phone != null) {
             doctor.setPhone(phone);
+        }
+        if (gender != null && !gender.isEmpty()) {
+            doctor.setGender(gender);
         }
         if (remark != null) {
             doctor.setIntro(remark);
@@ -332,5 +338,33 @@ public class DoctorController {
         operateLogMapper.insert(log);
 
         return ResponseVo.success(result);
+    }
+
+    @GetMapping("/get")
+    public ResponseVo get(@RequestParam Integer id) {
+        if (id == null) {
+            return ResponseVo.error(400, "医生ID不能为空");
+        }
+
+        Doctor doctor = doctorMapper.selectById(id);
+        if (doctor == null) {
+            return ResponseVo.error(404, "医生不存在");
+        }
+
+        Map<String, Object> doctorMap = new HashMap<>();
+        doctorMap.put("id", doctor.getId());
+        doctorMap.put("name", doctor.getName());
+        doctorMap.put("doctorAccount", doctor.getWorkNo());
+        doctorMap.put("deptId", doctor.getDeptId());
+        doctorMap.put("gender", doctor.getGender());
+        doctorMap.put("title", doctor.getTitle());
+        doctorMap.put("phone", doctor.getPhone());
+        doctorMap.put("remark", doctor.getIntro());
+        doctorMap.put("status", doctor.getStatus());
+
+        Dept dept = deptMapper.selectById(doctor.getDeptId());
+        doctorMap.put("deptName", dept != null ? dept.getDeptName() : "-");
+
+        return ResponseVo.success(doctorMap);
     }
 }

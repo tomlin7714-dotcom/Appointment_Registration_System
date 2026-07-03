@@ -498,6 +498,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>姓名</th>
+                                    <th>性别</th>
                                     <th>账号</th>
                                     <th>科室</th>
                                     <th>职称</th>
@@ -671,6 +672,13 @@
                         <label>所属科室 *</label>
                         <select id="doctorDeptId" required>
                             <option value="">请选择科室</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>性别</label>
+                        <select id="doctorGender">
+                            <option value="男">男</option>
+                            <option value="女">女</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1017,6 +1025,7 @@
                 tr.innerHTML = `
                     <td>${doctor.id}</td>
                     <td>${doctor.name}</td>
+                    <td>${doctor.gender || '-'}</td>
                     <td>${doctor.doctorAccount}</td>
                     <td>${doctor.deptName || '-'}</td>
                     <td>${doctor.title || '-'}</td>
@@ -1045,9 +1054,35 @@
         }
         
         // 编辑医生
-        function editDoctor(id) {
+        async function editDoctor(id) {
             document.getElementById('doctorModalTitle').textContent = '编辑医生';
-            document.getElementById('doctorId').value = id;
+            document.getElementById('doctorForm').reset();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/doctor/get?id=${id}`, {
+                    headers: {
+                        'token': localStorage.getItem('adminToken')
+                    }
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    const doctor = data.data;
+                    document.getElementById('doctorId').value = id;
+                    document.getElementById('doctorName').value = doctor.name || '';
+                    document.getElementById('doctorAccount').value = doctor.doctorAccount || '';
+                    document.getElementById('doctorPwd').value = '';
+                    document.getElementById('doctorDeptId').value = doctor.deptId || '';
+                    document.getElementById('doctorGender').value = doctor.gender || '男';
+                    document.getElementById('doctorTitle').value = doctor.title || '';
+                    document.getElementById('doctorPhone').value = doctor.phone || '';
+                    document.getElementById('doctorRemark').value = doctor.remark || '';
+                } else {
+                    showMessage('获取医生信息失败', 'error');
+                }
+            } catch (error) {
+                console.error('获取医生信息错误:', error);
+            }
+
             document.getElementById('doctorModal').classList.add('active');
         }
         
@@ -1058,6 +1093,7 @@
             const doctorAccount = document.getElementById('doctorAccount').value.trim();
             const pwd = document.getElementById('doctorPwd').value;
             const deptId = document.getElementById('doctorDeptId').value;
+            const gender = document.getElementById('doctorGender').value;
             const title = document.getElementById('doctorTitle').value.trim();
             const phone = document.getElementById('doctorPhone').value.trim();
             const remark = document.getElementById('doctorRemark').value.trim();
@@ -1081,6 +1117,7 @@
                     name,
                     doctorAccount,
                     deptId,
+                    gender,
                     title,
                     phone,
                     remark
