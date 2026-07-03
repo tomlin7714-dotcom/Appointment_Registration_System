@@ -98,12 +98,12 @@ Page({
 
   bookDept(e) {
     const deptId = e.currentTarget.dataset.deptid;
-    if (!deptId) {
-      wx.showToast({ title: '暂不支持直接预约该科室', icon: 'none' });
-      return;
+    const deptName = e.currentTarget.dataset.deptname;
+    if (deptId) {
+      wx.navigateTo({ url: `/pages/booking/booking?deptId=${deptId}` });
+    } else {
+      wx.showToast({ title: `请手动选择「${deptName}」`, icon: 'none', duration: 2000 });
+      wx.navigateTo({ url: '/pages/booking/booking' });
     }
-    wx.navigateTo({
-      url: `/pages/booking/booking?deptId=${deptId}`
-    });
   }
 });
