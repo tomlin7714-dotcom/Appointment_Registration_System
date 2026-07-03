@@ -33,7 +33,7 @@ public class DoctorWorkController {
 
     @PostMapping("/schedule/save")
     public ResponseVo saveSchedule(@RequestBody Map<String, Object> params) {
-        Integer doctorId = (Integer) params.get("doctorId");
+        Integer doctorId = parseInteger(params.get("doctorId"));
         String date = (String) params.get("date");
         String period = (String) params.get("period");
 
@@ -41,16 +41,50 @@ public class DoctorWorkController {
             return ResponseVo.error(400, "参数不完整");
         }
 
+        // 将简写时段转换为完整格式
+        String fullPeriod;
+        switch (period) {
+            case "morning":
+                fullPeriod = "上午 08:00-12:00";
+                break;
+            case "afternoon":
+                fullPeriod = "下午 14:00-17:00";
+                break;
+            case "evening":
+                fullPeriod = "晚上 18:00-21:00";
+                break;
+            default:
+                fullPeriod = period;
+        }
+
+        // 检查是否已存在
+        List<Schedule> existing = scheduleMapper.selectByDoctorIdAndDate(doctorId, date);
+        for (Schedule s : existing) {
+            if (fullPeriod.equals(s.getVisitTime())) {
+                return ResponseVo.error(400, "该日期时段已存在排班");
+            }
+        }
+
         Schedule schedule = new Schedule();
         schedule.setDoctorId(doctorId);
         schedule.setVisitDate(date);
-        schedule.setVisitTime(period);
+        schedule.setVisitTime(fullPeriod);
         schedule.setStatus(0);
 
         scheduleMapper.insert(schedule);
 
+        // 自动创建号源
+        NumberSource numberSource = new NumberSource();
+        numberSource.setScheduleId(schedule.getId());
+        numberSource.setTotalNum(20);
+        numberSource.setRemainNum(20);
+        numberSource.setFee(0.0);
+        numberSource.setStatus(0);
+        numberSourceMapper.insert(numberSource);
+
         Map<String, Object> data = new HashMap<>();
         data.put("id", schedule.getId());
+        data.put("numberSourceId", numberSource.getId());
 
         return ResponseVo.success(data);
     }
@@ -522,6 +556,78 @@ public class DoctorWorkController {
         data.put("deptName", dept != null ? dept.getDeptName() : "");
 
         return ResponseVo.success(data);
+    }
+
+    @PostMapping("/schedule/auto")
+    public ResponseVo autoSchedule(@RequestBody Map<String, Object> params) {
+        Integer doctorId = parseInteger(params.get("doctorId"));
+
+        if (doctorId == null) {
+            return ResponseVo.error(400, "医生ID不能为空");
+        }
+
+        Doctor doctor = doctorMapper.selectById(doctorId);
+        if (doctor == null) {
+            return ResponseVo.error(404, "医生不存在");
+        }
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+
+        String[] periods = {
+            "上午 08:00-10:00",
+            "上午 10:00-12:00",
+            "下午 14:00-16:00",
+            "下午 16:00-18:00"
+        };
+
+        int createdCount = 0;
+
+        for (int i = 1; i <= 14; i++) {
+            cal.setTime(new Date());
+            cal.add(java.util.Calendar.DAY_OF_MONTH, i);
+            String visitDate = sdf.format(cal.getTime());
+
+            int dayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
+            if (dayOfWeek == java.util.Calendar.SUNDAY) {
+                continue;
+            }
+
+            for (String period : periods) {
+                List<Schedule> existing = scheduleMapper.selectByDoctorIdAndDate(doctorId, visitDate);
+                boolean hasPeriod = false;
+                for (Schedule s : existing) {
+                    if (period.equals(s.getVisitTime())) {
+                        hasPeriod = true;
+                        break;
+                    }
+                }
+
+                if (!hasPeriod) {
+                    Schedule schedule = new Schedule();
+                    schedule.setDoctorId(doctorId);
+                    schedule.setVisitDate(visitDate);
+                    schedule.setVisitTime(period);
+                    schedule.setStatus(0);
+                    scheduleMapper.insert(schedule);
+
+                    NumberSource numberSource = new NumberSource();
+                    numberSource.setScheduleId(schedule.getId());
+                    numberSource.setTotalNum(20);
+                    numberSource.setRemainNum(20);
+                    numberSource.setFee(0.0);
+                    numberSource.setStatus(0);
+                    numberSourceMapper.insert(numberSource);
+
+                    createdCount++;
+                }
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("createdCount", createdCount);
+
+        return ResponseVo.success(result);
     }
 
     @GetMapping("/schedule/cleanExpired")

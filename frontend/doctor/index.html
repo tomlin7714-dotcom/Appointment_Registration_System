@@ -626,7 +626,9 @@
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">我的排班（系统自动维护未来两周排班）</span>
-                        <div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="autoSchedule()">🔄 自动排班</button>
+                            <button class="btn btn-warning" onclick="cleanExpiredSchedules()">🗑️ 清理过期排班</button>
                             <button class="btn btn-primary" onclick="openScheduleModal()">+ 新增排班</button>
                         </div>
                     </div>
