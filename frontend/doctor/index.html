@@ -1080,33 +1080,85 @@
         
         function loadProfile() {
             const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
-            if (doctorInfo) {
-                document.getElementById('profileName').value = doctorInfo.name || '';
-                document.getElementById('profileAccount').value = doctorInfo.doctorAccount || '';
-                document.getElementById('profileDept').value = doctorInfo.deptName || '';
-                document.getElementById('profileTitle').value = doctorInfo.title || '';
-                document.getElementById('profilePhone').value = doctorInfo.phone || '';
-                document.getElementById('profileRemark').value = doctorInfo.remark || '';
-            }
+
+            // 从API获取最新信息
+            fetch(`${API_BASE_URL}/api/doctor/profile/get?doctorId=${doctorInfo.id}`, {
+                headers: {
+                    'token': localStorage.getItem('doctorToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const profile = data.data;
+                    document.getElementById('profileName').value = profile.name || '';
+                    document.getElementById('profileAccount').value = profile.workNo || '';
+                    document.getElementById('profileDept').value = profile.deptName || '';
+                    document.getElementById('profileTitle').value = profile.title || '';
+                    document.getElementById('profilePhone').value = profile.phone || '';
+                    document.getElementById('profileRemark').value = profile.remark || '';
+                }
+            })
+            .catch(error => {
+                console.error('加载个人信息错误:', error);
+            });
         }
-        
+
         document.getElementById('profileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            showMessage('个人信息保存成功', 'success');
+
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
+            const title = document.getElementById('profileTitle').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            const remark = document.getElementById('profileRemark').value.trim();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/doctor/profile/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('doctorToken')
+                    },
+                    body: JSON.stringify({
+                        id: doctorInfo.id,
+                        name: document.getElementById('profileName').value,
+                        phone: phone,
+                        title: title,
+                        remark: remark
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    showMessage('个人信息保存成功', 'success');
+                    // 更新本地存储的医生信息
+                    doctorInfo.title = title;
+                    doctorInfo.phone = phone;
+                    doctorInfo.remark = remark;
+                    localStorage.setItem('doctorInfo', JSON.stringify(doctorInfo));
+                } else {
+                    showMessage(data.msg || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存个人信息错误:', error);
+                showMessage('网络错误，请稍后重试', 'error');
+            }
         });
         
         document.getElementById('pwdForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
+            const doctorInfo = JSON.parse(localStorage.getItem('doctorInfo'));
             const oldPwd = document.getElementById('oldPwd').value;
             const newPwd = document.getElementById('newPwd').value;
             const confirmPwd = document.getElementById('confirmPwd').value;
-            
+
             if (newPwd !== confirmPwd) {
                 showMessage('两次输入的新密码不一致', 'error');
                 return;
             }
-            
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/doctor/pwd/modify`, {
                     method: 'POST',
@@ -1114,7 +1166,11 @@
                         'Content-Type': 'application/json',
                         'token': localStorage.getItem('doctorToken')
                     },
-                    body: JSON.stringify({ oldPwd, newPwd })
+                    body: JSON.stringify({
+                        oldPwd: oldPwd,
+                        newPwd: newPwd,
+                        workNo: doctorInfo.doctorAccount
+                    })
                 });
                 
                 const data = await response.json();
