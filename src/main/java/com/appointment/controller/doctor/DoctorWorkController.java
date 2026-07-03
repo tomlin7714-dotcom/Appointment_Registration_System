@@ -848,6 +848,20 @@ public class DoctorWorkController {
         return ResponseVo.success();
     }
 
+    private Integer parseInteger(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof Integer) return (Integer) obj;
+        if (obj instanceof String) {
+            try {
+                return Integer.parseInt((String) obj);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        if (obj instanceof Number) return ((Number) obj).intValue();
+        return null;
+    }
+
     private Double parseDouble(Object obj) {
         if (obj == null) return null;
         if (obj instanceof Double) return (Double) obj;
