@@ -1,10 +1,6 @@
 package com.appointment.controller.user;
 
-import com.appointment.entity.Appointment;
-import com.appointment.entity.ConsultationForm;
-import com.appointment.entity.Doctor;
-import com.appointment.entity.Schedule;
-import com.appointment.entity.NumberSource;
+import com.appointment.entity.*;
 import com.appointment.mapper.*;
 import com.appointment.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +84,6 @@ public class ConsultationFormController {
             return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
         }
     }
-
-    @Autowired
-    private NumberSourceMapper numberSourceMapper;
-    @Autowired
-    private ScheduleMapper scheduleMapper;
 
     /**
      * 获取问诊详情
