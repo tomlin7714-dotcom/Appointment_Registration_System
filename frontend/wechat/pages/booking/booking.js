@@ -16,22 +16,48 @@ Page({
     selectedDoctorName: '',
     selectedScheduleId: null,
     selectedTime: '',
-    selectedNumberSource: null
+    selectedNumberSource: null,
+
+    // 问诊信息
+    consultationTypeList: ['初诊', '复诊', '急诊'],
+    consultationType: '',
+    chiefComplaint: '',
+    medicalHistory: '',
+    recoveryHistory: ''
   },
 
   onLoad(options) {
     console.log('预约页面参数:', options);
-    
+
     if (options.deptId) {
       const deptId = parseInt(options.deptId);
-      this.setData({ 
+      this.setData({
         selectedDeptId: deptId,
         currentStep: 2
       });
     }
-    
+
     this.loadDeptList();
     this.generateDateList();
+  },
+
+  // ==================== 问诊信息 ====================
+  onConsultationTypeChange(e) {
+    const index = e.detail.value;
+    const types = ['初诊', '复诊', '急诊'];
+    this.setData({ consultationType: types[index] });
+  },
+
+  onChiefComplaintInput(e) {
+    this.setData({ chiefComplaint: e.detail.value });
+  },
+
+  onMedicalHistoryInput(e) {
+    this.setData({ medicalHistory: e.detail.value });
+  },
+
+  onRecoveryHistoryInput(e) {
+    this.setData({ recoveryHistory: e.detail.value });
   },
 
   // 加载科室列表
@@ -293,7 +319,11 @@ Page({
           numberSourceId: selectedNumberSource.numberSourceId,
           userId: userInfo.id,
           patientName,
-          patientIdCard
+          patientIdCard,
+          consultationType: this.data.consultationType,
+          chiefComplaint: this.data.chiefComplaint,
+          medicalHistory: this.data.medicalHistory,
+          recoveryHistory: this.data.recoveryHistory
         }
       });
 

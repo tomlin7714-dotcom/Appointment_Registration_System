@@ -90,7 +90,7 @@
     </view>
   </view>
 
-  <!-- 步骤4：选择号源 -->
+  <!-- 步骤4：选择号源 + 填写问诊信息 -->
   <view wx:if="{{currentStep === 4}}" class="step-content">
     <view class="section-title">{{selectedDoctorName}} - 选择时间段</view>
     <view class="schedule-info">
@@ -98,10 +98,10 @@
       <text class="info-text">🏥 {{selectedDeptName}}</text>
     </view>
     <view class="time-slot-list">
-      <view class="time-slot-card {{selectedScheduleId === item.id ? 'selected' : ''}} {{item.remainNum === 0 ? 'disabled' : ''}}" 
-            wx:for="{{scheduleList}}" 
-            wx:key="id" 
-            bindtap="selectSchedule" 
+      <view class="time-slot-card {{selectedScheduleId === item.id ? 'selected' : ''}} {{item.remainNum === 0 ? 'disabled' : ''}}"
+            wx:for="{{scheduleList}}"
+            wx:key="id"
+            bindtap="selectSchedule"
             data-id="{{item.id}}"
             data-time="{{item.visitTime}}"
             data-nsid="{{item.numberSourceId}}"
@@ -118,6 +118,34 @@
         <view class="select-icon" wx:if="{{selectedScheduleId === item.id}}">✓</view>
       </view>
     </view>
+
+    <!-- 问诊信息填写 -->
+    <view class="consultation-section" wx:if="{{selectedScheduleId}}">
+      <view class="section-title">问诊信息</view>
+      <view class="form-card">
+        <view class="form-item">
+          <text class="form-label">问诊类型</text>
+          <picker class="form-picker" mode="selector" range="{{consultationTypeList}}" bindchange="onConsultationTypeChange">
+            <view class="picker-value {{consultationType ? '' : 'placeholder'}}">
+              {{consultationType || '请选择问诊类型'}}
+            </view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="form-label">主诉</text>
+          <textarea class="form-textarea" value="{{chiefComplaint}}" bindinput="onChiefComplaintInput" placeholder="请简要描述您的主要症状和持续时间" maxlength="200"></textarea>
+        </view>
+        <view class="form-item">
+          <text class="form-label">就诊史</text>
+          <textarea class="form-textarea" value="{{medicalHistory}}" bindinput="onMedicalHistoryInput" placeholder="既往病史、手术史、过敏史等" maxlength="500"></textarea>
+        </view>
+        <view class="form-item">
+          <text class="form-label">康复史</text>
+          <textarea class="form-textarea" value="{{recoveryHistory}}" bindinput="onRecoveryHistoryInput" placeholder="近期康复情况、用药情况等" maxlength="500"></textarea>
+        </view>
+      </view>
+    </view>
+
     <view class="empty-state" wx:if="{{scheduleList.length === 0}}">
       <text class="empty-icon">😔</text>
       <text class="empty-text">该医生今日暂无号源</text>
