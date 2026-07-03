@@ -26,8 +26,14 @@ Page({
   // 检查登录状态
   checkLoginStatus() {
     const token = wx.getStorageSync('token');
-    const userInfo = wx.getStorageSync('userInfo') || {};
-    
+    let userInfo = wx.getStorageSync('userInfo') || {};
+
+    // 修复头像路径为完整URL
+    if (userInfo.avatar && userInfo.avatar.startsWith('/')) {
+      userInfo.avatar = app.globalData.apiBaseUrl + userInfo.avatar;
+      wx.setStorageSync('userInfo', userInfo);
+    }
+
     this.setData({
       isLoggedIn: !!token,
       userInfo: userInfo

@@ -91,7 +91,7 @@ public class UserInfoController {
             File dest = new File(dir, fileName);
             file.transferTo(dest);
 
-            // 返回可访问的URL
+            // 返回完整URL
             String avatarUrl = "/uploads/avatars/" + fileName;
 
             Map<String, Object> data = new HashMap<>();

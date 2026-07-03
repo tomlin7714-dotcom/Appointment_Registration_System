@@ -25,6 +25,10 @@ Page({
       }).then(res => {
         if (res.code === 200) {
           const info = res.data;
+          // 处理头像路径
+          if (info.avatar && info.avatar.startsWith('/')) {
+            info.avatar = app.globalData.apiBaseUrl + info.avatar;
+          }
           // 合并本地和远程数据
           const merged = { ...localInfo, ...info };
           this.setData({ userInfo: merged });
@@ -58,7 +62,7 @@ Page({
             try {
               const data = JSON.parse(uploadRes.data);
               if (data.code === 200) {
-                const avatarUrl = data.data.avatarUrl;
+                const avatarUrl = app.globalData.apiBaseUrl + data.data.avatarUrl;
                 this.setData({
                   'userInfo.avatar': avatarUrl
                 });
