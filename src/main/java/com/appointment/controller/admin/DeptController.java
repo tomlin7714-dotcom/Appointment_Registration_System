@@ -8,6 +8,7 @@ import com.appointment.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,7 +41,8 @@ public class DeptController {
             deptMap.put("deptDesc", dept.getDeptDesc());
             deptMap.put("area", dept.getArea());
             deptMap.put("roomNumber", dept.getRoomNumber());
-            deptMap.put("createTime", dept.getCreateTime());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            deptMap.put("createTime", dept.getCreateTime() != null ? sdf.format(dept.getCreateTime()) : "");
             result.add(deptMap);
         }
         
