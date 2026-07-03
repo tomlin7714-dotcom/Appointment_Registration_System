@@ -22,7 +22,7 @@ Page({
   async loadDetail(appointmentId) {
     try {
       const res = await app.request({
-        url: `/api/user/appointment/consultation/detail?appointmentId=${appointmentId}`,
+        url: `/api/user/consultation/detail?appointmentId=${appointmentId}`,
         method: 'GET'
       });
 

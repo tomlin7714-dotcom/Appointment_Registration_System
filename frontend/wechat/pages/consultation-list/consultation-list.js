@@ -26,7 +26,7 @@ Page({
     const { keyword } = this.data;
 
     try {
-      let url = `/api/user/appointment/consultation/list?userId=${userInfo.id}`;
+      let url = `/api/user/consultation/list?userId=${userInfo.id}`;
       if (keyword) {
         url += `&keyword=${encodeURIComponent(keyword)}`;
       }

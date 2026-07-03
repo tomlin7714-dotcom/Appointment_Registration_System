@@ -319,15 +319,27 @@ Page({
           numberSourceId: selectedNumberSource.numberSourceId,
           userId: userInfo.id,
           patientName,
-          patientIdCard,
-          consultationType: this.data.consultationType,
-          chiefComplaint: this.data.chiefComplaint,
-          medicalHistory: this.data.medicalHistory,
-          recoveryHistory: this.data.recoveryHistory
+          patientIdCard
         }
       });
 
       if (res.code === 200) {
+        // 保存问诊单到 consultation_form
+        const appointmentId = res.data.appointmentId;
+        if (appointmentId && this.data.consultationType) {
+          await app.request({
+            url: '/api/user/consultation/save',
+            method: 'POST',
+            data: {
+              appointmentId: appointmentId,
+              consultationType: this.data.consultationType,
+              chiefComplaint: this.data.chiefComplaint,
+              medicalHistory: this.data.medicalHistory,
+              recoveryHistory: this.data.recoveryHistory
+            }
+          });
+        }
+
         wx.hideLoading();
         
         console.log('预约创建返回数据:', res);
