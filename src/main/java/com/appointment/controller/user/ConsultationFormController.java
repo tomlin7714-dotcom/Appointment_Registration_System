@@ -27,6 +27,15 @@ public class ConsultationFormController {
     @Autowired
     private DoctorMapper doctorMapper;
 
+    @Autowired
+    private DeptMapper deptMapper;
+
+    @Autowired
+    private NumberSourceMapper numberSourceMapper;
+
+    @Autowired
+    private ScheduleMapper scheduleMapper;
+
     /**
      * 保存问诊信息（预约后补充填写）
      */
@@ -100,12 +109,26 @@ public class ConsultationFormController {
                 return ResponseVo.error(404, "问诊单不存在");
             }
 
-            // 补充患者和医生信息
+            // 补充患者、医生、科室和就诊信息
             Appointment appointment = appointmentMapper.selectById(appointmentId);
             if (appointment != null) {
                 form.setPatientName(appointment.getPatientName());
                 form.setPatientIdCard(appointment.getPatientIdCard());
                 form.setAppointmentStatus(appointment.getStatus());
+                form.setVisitDate(appointment.getAppointmentTime() != null ?
+                    new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(appointment.getAppointmentTime()) : "");
+
+                // 从号源和排班获取就诊时间
+                NumberSource ns = numberSourceMapper.selectById(appointment.getNumberSourceId());
+                if (ns != null) {
+                    Schedule schedule = scheduleMapper.selectById(ns.getScheduleId());
+                    if (schedule != null) {
+                        if (form.getVisitDate() == null || form.getVisitDate().isEmpty()) {
+                            form.setVisitDate(schedule.getVisitDate());
+                        }
+                        form.setVisitTime(schedule.getVisitTime());
+                    }
+                }
             }
 
             if (form.getDoctorId() != null) {
@@ -113,6 +136,11 @@ public class ConsultationFormController {
                 if (doctor != null) {
                     form.setDoctorName(doctor.getName());
                     form.setDoctorTitle(doctor.getTitle());
+
+                    Dept dept = deptMapper.selectById(doctor.getDeptId());
+                    if (dept != null) {
+                        form.setDeptName(dept.getDeptName());
+                    }
                 }
             }
 
