@@ -1,0 +1,69 @@
+<!--pages/ai-triage/ai-triage.wxml-->
+<view class="page-container">
+  <!-- 头部提示 -->
+  <view class="header-tip">
+    <text class="tip-icon">🤖</text>
+    <text class="tip-text">AI智能导诊 - 描述您的症状，帮您推荐科室</text>
+  </view>
+
+  <!-- 对话区域 -->
+  <scroll-view class="chat-area" scroll-y="true" id="chatArea" scroll-into-view="{{scrollToId}}">
+    <!-- AI消息 -->
+    <view class="message-row ai-row">
+      <view class="msg-avatar ai-avatar">🤖</view>
+      <view class="msg-content ai-msg">
+        <text class="msg-text">您好！我是AI导诊助手，请描述您的症状或不适，我帮您推荐合适的就诊科室。</text>
+        <text class="msg-text" style="margin-top: 8px; font-size: 24rpx; color: #999;">例如：头痛发热、肚子疼、咳嗽、腰疼...</text>
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="index" id="msg-{{item.id}}">
+      <view class="message-row {{item.role === 'user' ? 'user-row' : 'ai-row'}}">
+        <view class="msg-avatar {{item.role === 'user' ? 'user-avatar' : 'ai-avatar'}}">
+          {{item.role === 'user' ? '👤' : '🤖'}}
+        </view>
+        <view class="msg-content {{item.role === 'user' ? 'user-msg' : 'ai-msg'}}">
+          <text class="msg-text">{{item.content}}</text>
+          <!-- 推荐科室按钮 -->
+          <view class="dept-recommend" wx:if="{{item.depts && item.depts.length > 0}}">
+            <text class="recommend-title">🏥 推荐科室</text>
+            <view class="recommend-list">
+              <view class="recommend-item" wx:for="{{item.depts}}" wx:key="deptId" bindtap="bookDept" data-deptid="{{item.deptId}}" data-deptname="{{item.deptName}}">
+                <text class="recommend-name">{{item.deptName}}</text>
+                <text class="recommend-arrow">立即预约 ></text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="message-row ai-row" wx:if="{{isLoading}}">
+      <view class="msg-avatar ai-avatar">🤖</view>
+      <view class="msg-content ai-msg">
+        <text class="msg-text thinking">思考中<text class="dot-animation">...</text></text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 快捷症状 -->
+  <view class="quick-symptoms" wx:if="{{showQuickSymptoms && messages.length === 0}}">
+    <view class="qs-title">常见症状</view>
+    <view class="qs-tags">
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="头痛发热">头痛发热</view>
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="肚子疼、腹泻">肚子疼、腹泻</view>
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="咳嗽、喉咙痛">咳嗽、喉咙痛</view>
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="腰疼、腿疼">腰疼、腿疼</view>
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="皮肤过敏、起疹子">皮肤过敏</view>
+      <view class="qs-tag" bindtap="sendQuickSymptom" data-symptom="心慌、胸闷">心慌、胸闷</view>
+    </view>
+  </view>
+
+  <!-- 底部输入栏 -->
+  <view class="input-bar">
+    <input class="text-input" type="text" placeholder="描述您的症状..." value="{{inputValue}}" bindinput="onInput" bindconfirm="sendMessage" />
+    <button class="send-btn {{inputValue.trim() ? '' : 'disabled'}}" bindtap="sendMessage" disabled="{{!inputValue.trim()}}">发送</button>
+  </view>
+</view>

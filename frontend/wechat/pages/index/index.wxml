@@ -71,6 +71,10 @@
         <view class="entry-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 40rpx;">📅</view>
         <text class="entry-text">预约挂号</text>
       </view>
+      <view class="entry-item" bindtap="goToAiTriage">
+        <view class="entry-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; font-size: 40rpx;">🤖</view>
+        <text class="entry-text">AI导诊</text>
+      </view>
       <view class="entry-item" bindtap="goToAppointment">
         <view class="entry-icon" style="background: #fff3e0;">📋</view>
         <text class="entry-text">我的预约</text>

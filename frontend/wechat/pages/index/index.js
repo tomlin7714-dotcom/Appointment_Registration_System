@@ -168,6 +168,12 @@ Page({
     });
   },
 
+  goToAiTriage() {
+    wx.navigateTo({
+      url: '/pages/ai-triage/ai-triage'
+    });
+  },
+
   selectDept(e) {
     const deptId = e.currentTarget.dataset.id;
     wx.navigateTo({

@@ -12,7 +12,8 @@
     "pages/edit-profile/edit-profile",
     "pages/booking/booking",
     "pages/consultation-list/consultation-list",
-    "pages/consultation-detail/consultation-detail"
+    "pages/consultation-detail/consultation-detail",
+    "pages/ai-triage/ai-triage"
   ],
   "window": {
     "backgroundTextStyle": "light",
