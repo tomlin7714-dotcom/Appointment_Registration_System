@@ -773,16 +773,16 @@
                     <form id="diagnosisForm">
                         <input type="hidden" id="currentAppointmentId">
                         <div class="form-group">
+                            <label>检查</label>
+                            <textarea id="examinationInput" rows="3" placeholder="请输入检查结果"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label>诊断结果</label>
                             <textarea id="diagnosisInput" rows="3" placeholder="请输入诊断结果"></textarea>
                         </div>
                         <div class="form-group">
                             <label>治疗方案</label>
                             <textarea id="treatmentInput" rows="3" placeholder="请输入治疗方案"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>医嘱</label>
-                            <textarea id="adviceInput" rows="3" placeholder="请输入医嘱"></textarea>
                         </div>
                         <button type="button" class="btn btn-primary" onclick="saveDiagnosis()">💾 保存问诊单并完成就诊</button>
                     </form>
@@ -1921,35 +1921,33 @@
                     let html = '';
 
                     // 患者问诊信息
-                    if (c.consultationType || c.chiefComplaint || c.medicalHistory || c.recoveryHistory) {
+                    if (c.formType || c.chiefComplaint || c.presentIllness || c.pastHistory) {
                         html += '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0;">';
                         html += '<h4 style="margin-bottom: 12px; color: #667eea;">患者自述</h4>';
-                        if (c.consultationType) html += `<p style="margin-bottom: 8px;"><strong>问诊类型：</strong>${c.consultationType}</p>`;
+                        if (c.formType) html += `<p style="margin-bottom: 8px;"><strong>问诊类型：</strong>${c.formType}</p>`;
                         if (c.chiefComplaint) html += `<p style="margin-bottom: 8px;"><strong>主诉：</strong>${c.chiefComplaint}</p>`;
-                        if (c.medicalHistory) html += `<p style="margin-bottom: 8px;"><strong>就诊史：</strong>${c.medicalHistory}</p>`;
-                        if (c.recoveryHistory) html += `<p style="margin-bottom: 8px;"><strong>康复史：</strong>${c.recoveryHistory}</p>`;
+                        if (c.presentIllness) html += `<p style="margin-bottom: 8px;"><strong>现病史：</strong>${c.presentIllness}</p>`;
+                        if (c.pastHistory) html += `<p style="margin-bottom: 8px;"><strong>既往史：</strong>${c.pastHistory}</p>`;
                         html += '</div>';
                     } else {
                         html += '<p style="color: #999; margin-bottom: 16px;">患者未填写问诊信息</p>';
                     }
 
                     // 已有诊断信息
-                    if (c.diagnosis || c.treatment || c.doctorAdvice) {
+                    if (c.diagnosis || c.treatment || c.examination) {
                         html += '<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0;">';
                         html += '<h4 style="margin-bottom: 12px; color: #27ae60;">已保存的诊断</h4>';
+                        if (c.examination) html += `<p style="margin-bottom: 8px;"><strong>检查：</strong>${c.examination}</p>`;
                         if (c.diagnosis) html += `<p style="margin-bottom: 8px;"><strong>诊断：</strong>${c.diagnosis}</p>`;
                         if (c.treatment) html += `<p style="margin-bottom: 8px;"><strong>治疗方案：</strong>${c.treatment}</p>`;
-                        if (c.doctorAdvice) html += `<p style="margin-bottom: 8px;"><strong>医嘱：</strong>${c.doctorAdvice}</p>`;
                         html += '</div>';
 
                         // 回填诊断表单
                         document.getElementById('diagnosisInput').value = c.diagnosis || '';
                         document.getElementById('treatmentInput').value = c.treatment || '';
-                        document.getElementById('adviceInput').value = c.doctorAdvice || '';
                     } else {
                         document.getElementById('diagnosisInput').value = '';
                         document.getElementById('treatmentInput').value = '';
-                        document.getElementById('adviceInput').value = '';
                     }
 
                     document.getElementById('consultationContent').innerHTML = html;
@@ -1979,7 +1977,6 @@
             const appointmentId = document.getElementById('currentAppointmentId').value;
             const diagnosis = document.getElementById('diagnosisInput').value.trim();
             const treatment = document.getElementById('treatmentInput').value.trim();
-            const doctorAdvice = document.getElementById('adviceInput').value.trim();
 
             if (!appointmentId) {
                 showMessage('请先选择患者', 'error');
@@ -2001,8 +1998,7 @@
                     body: JSON.stringify({
                         appointmentId: parseInt(appointmentId),
                         diagnosis: diagnosis,
-                        treatment: treatment,
-                        doctorAdvice: doctorAdvice
+                        treatment: treatment
                     })
                 });
 

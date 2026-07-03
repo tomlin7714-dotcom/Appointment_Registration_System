@@ -18,7 +18,7 @@
       </view>
       <view class="record-body">
         <text class="record-date">{{item.visitDate}} {{item.visitTime}}</text>
-        <text class="record-type" wx:if="{{item.consultationType}}">{{item.consultationType}}</text>
+        <text class="record-type" wx:if="{{item.formType}}">{{item.formType}}</text>
       </view>
       <view class="record-complaint" wx:if="{{item.chiefComplaint}}">
         <text class="complaint-label">主诉：</text>

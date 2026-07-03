@@ -326,16 +326,16 @@ Page({
       if (res.code === 200) {
         // 保存问诊单到 consultation_form
         const appointmentId = res.data.appointmentId;
-        if (appointmentId && this.data.consultationType) {
+        if (appointmentId && (this.data.consultationType || this.data.chiefComplaint)) {
           await app.request({
             url: '/api/user/consultation/save',
             method: 'POST',
             data: {
               appointmentId: appointmentId,
-              consultationType: this.data.consultationType,
+              formType: this.data.consultationType,
               chiefComplaint: this.data.chiefComplaint,
-              medicalHistory: this.data.medicalHistory,
-              recoveryHistory: this.data.recoveryHistory
+              presentIllness: this.data.recoveryHistory,
+              pastHistory: this.data.medicalHistory
             }
           });
         }

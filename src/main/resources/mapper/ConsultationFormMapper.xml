@@ -3,14 +3,18 @@
 <mapper namespace="com.appointment.mapper.ConsultationFormMapper">
     <resultMap id="BaseResultMap" type="com.appointment.entity.ConsultationForm">
         <id column="id" property="id"/>
+        <result column="consultation_no" property="consultationNo"/>
         <result column="appointment_id" property="appointmentId"/>
-        <result column="consultation_type" property="consultationType"/>
+        <result column="user_id" property="userId"/>
+        <result column="doctor_id" property="doctorId"/>
+        <result column="form_type" property="formType"/>
         <result column="chief_complaint" property="chiefComplaint"/>
-        <result column="medical_history" property="medicalHistory"/>
-        <result column="recovery_history" property="recoveryHistory"/>
+        <result column="present_illness" property="presentIllness"/>
+        <result column="past_history" property="pastHistory"/>
+        <result column="examination" property="examination"/>
         <result column="diagnosis" property="diagnosis"/>
         <result column="treatment" property="treatment"/>
-        <result column="doctor_advice" property="doctorAdvice"/>
+        <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -23,12 +27,13 @@
         <result column="dept_name" property="deptName"/>
         <result column="visit_date" property="visitDate"/>
         <result column="visit_time" property="visitTime"/>
-        <result column="apt_status" property="status"/>
+        <result column="apt_status" property="appointmentStatus"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, appointment_id, consultation_type, chief_complaint, medical_history, recovery_history,
-        diagnosis, treatment, doctor_advice, create_time, update_time
+        id, consultation_no, appointment_id, user_id, doctor_id, form_type, chief_complaint,
+        present_illness, past_history, examination, diagnosis, treatment, status,
+        create_time, update_time
     </sql>
 
     <select id="selectById" resultMap="BaseResultMap">
@@ -51,10 +56,10 @@
         LEFT JOIN appointment a ON cf.appointment_id = a.id
         LEFT JOIN number_source ns ON a.number_source_id = ns.id
         LEFT JOIN schedule s ON ns.schedule_id = s.id
-        LEFT JOIN doctor d ON s.doctor_id = d.id
+        LEFT JOIN doctor d ON cf.doctor_id = d.id
         LEFT JOIN dept dp ON d.dept_id = dp.id
-        WHERE a.user_id = #{userId}
-        ORDER BY s.visit_date DESC, s.visit_time DESC
+        WHERE cf.user_id = #{userId}
+        ORDER BY cf.create_time DESC
     </select>
 
     <select id="searchByUserId" resultMap="DetailResultMap">
@@ -65,31 +70,32 @@
         LEFT JOIN appointment a ON cf.appointment_id = a.id
         LEFT JOIN number_source ns ON a.number_source_id = ns.id
         LEFT JOIN schedule s ON ns.schedule_id = s.id
-        LEFT JOIN doctor d ON s.doctor_id = d.id
+        LEFT JOIN doctor d ON cf.doctor_id = d.id
         LEFT JOIN dept dp ON d.dept_id = dp.id
-        WHERE a.user_id = #{userId}
+        WHERE cf.user_id = #{userId}
           AND (d.name LIKE CONCAT('%', #{keyword}, '%')
                OR dp.dept_name LIKE CONCAT('%', #{keyword}, '%')
                OR cf.chief_complaint LIKE CONCAT('%', #{keyword}, '%')
                OR cf.diagnosis LIKE CONCAT('%', #{keyword}, '%')
-               OR cf.consultation_type LIKE CONCAT('%', #{keyword}, '%'))
-        ORDER BY s.visit_date DESC, s.visit_time DESC
+               OR cf.form_type LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY cf.create_time DESC
     </select>
 
     <insert id="insert" parameterType="com.appointment.entity.ConsultationForm" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO consultation_form (appointment_id, consultation_type, chief_complaint, medical_history, recovery_history, diagnosis, treatment, doctor_advice, create_time)
-        VALUES (#{appointmentId}, #{consultationType}, #{chiefComplaint}, #{medicalHistory}, #{recoveryHistory}, #{diagnosis}, #{treatment}, #{doctorAdvice}, NOW())
+        INSERT INTO consultation_form (consultation_no, appointment_id, user_id, doctor_id, form_type, chief_complaint, present_illness, past_history, create_time)
+        VALUES (#{consultationNo}, #{appointmentId}, #{userId}, #{doctorId}, #{formType}, #{chiefComplaint}, #{presentIllness}, #{pastHistory}, NOW())
     </insert>
 
     <update id="update" parameterType="com.appointment.entity.ConsultationForm">
         UPDATE consultation_form
-        SET consultation_type = #{consultationType},
+        SET form_type = #{formType},
             chief_complaint = #{chiefComplaint},
-            medical_history = #{medicalHistory},
-            recovery_history = #{recoveryHistory},
+            present_illness = #{presentIllness},
+            past_history = #{pastHistory},
+            examination = #{examination},
             diagnosis = #{diagnosis},
             treatment = #{treatment},
-            doctor_advice = #{doctorAdvice},
+            status = #{status},
             update_time = NOW()
         WHERE id = #{id}
     </update>

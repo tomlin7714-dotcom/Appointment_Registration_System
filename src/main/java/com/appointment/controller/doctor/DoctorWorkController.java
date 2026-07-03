@@ -857,65 +857,68 @@ public class DoctorWorkController {
             return ResponseVo.error(400, "预约ID不能为空");
         }
 
-        // 从consultation_form表获取
-        ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
+        try {
+            // 从consultation_form表获取
+            ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
+            Appointment appointment = appointmentMapper.selectById(appointmentId);
 
-        // 获取预约信息和患者信息
-        Appointment appointment = appointmentMapper.selectById(appointmentId);
+            Map<String, Object> data = new HashMap<>();
+            data.put("appointmentId", appointmentId);
+            data.put("patientName", appointment != null ? appointment.getPatientName() : "");
+            data.put("patientIdCard", appointment != null ? appointment.getPatientIdCard() : "");
+            data.put("appointmentStatus", appointment != null ? appointment.getStatus() : null);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("appointmentId", appointmentId);
-        data.put("patientName", appointment != null ? appointment.getPatientName() : "");
-        data.put("patientIdCard", appointment != null ? appointment.getPatientIdCard() : "");
-        data.put("status", appointment != null ? appointment.getStatus() : null);
+            if (form != null) {
+                data.put("formType", form.getFormType());
+                data.put("chiefComplaint", form.getChiefComplaint());
+                data.put("presentIllness", form.getPresentIllness());
+                data.put("pastHistory", form.getPastHistory());
+                data.put("examination", form.getExamination());
+                data.put("diagnosis", form.getDiagnosis());
+                data.put("treatment", form.getTreatment());
+                data.put("formStatus", form.getStatus());
+            } else {
+                data.put("formType", "");
+                data.put("chiefComplaint", "");
+                data.put("presentIllness", "");
+                data.put("pastHistory", "");
+                data.put("examination", "");
+                data.put("diagnosis", "");
+                data.put("treatment", "");
+                data.put("formStatus", null);
+            }
 
-        if (form != null) {
-            data.put("consultationType", form.getConsultationType());
-            data.put("chiefComplaint", form.getChiefComplaint());
-            data.put("medicalHistory", form.getMedicalHistory());
-            data.put("recoveryHistory", form.getRecoveryHistory());
-            data.put("diagnosis", form.getDiagnosis());
-            data.put("treatment", form.getTreatment());
-            data.put("doctorAdvice", form.getDoctorAdvice());
-        } else {
-            data.put("consultationType", "");
-            data.put("chiefComplaint", "");
-            data.put("medicalHistory", "");
-            data.put("recoveryHistory", "");
-            data.put("diagnosis", "");
-            data.put("treatment", "");
-            data.put("doctorAdvice", "");
-        }
+            if (appointment != null) {
+                User user = userMapper.selectById(appointment.getUserId());
+                data.put("patientPhone", user != null ? user.getPhone() : "");
 
-        // 患者电话
-        if (appointment != null) {
-            User user = userMapper.selectById(appointment.getUserId());
-            data.put("patientPhone", user != null ? user.getPhone() : "");
+                NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
+                if (source != null) {
+                    Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
+                    if (schedule != null) {
+                        data.put("visitDate", schedule.getVisitDate());
+                        data.put("visitTime", schedule.getVisitTime());
 
-            // 就诊信息
-            NumberSource source = numberSourceMapper.selectById(appointment.getNumberSourceId());
-            if (source != null) {
-                Schedule schedule = scheduleMapper.selectById(source.getScheduleId());
-                if (schedule != null) {
-                    data.put("visitDate", schedule.getVisitDate());
-                    data.put("visitTime", schedule.getVisitTime());
-
-                    Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
-                    if (doctor != null) {
-                        data.put("doctorName", doctor.getName());
-                        data.put("doctorTitle", doctor.getTitle());
-                        Dept dept = deptMapper.selectById(doctor.getDeptId());
-                        if (dept != null) {
-                            data.put("deptName", dept.getDeptName());
-                            data.put("area", dept.getArea());
-                            data.put("roomNumber", dept.getRoomNumber());
+                        Doctor doctor = doctorMapper.selectById(schedule.getDoctorId());
+                        if (doctor != null) {
+                            data.put("doctorName", doctor.getName());
+                            data.put("doctorTitle", doctor.getTitle());
+                            Dept dept = deptMapper.selectById(doctor.getDeptId());
+                            if (dept != null) {
+                                data.put("deptName", dept.getDeptName());
+                                data.put("area", dept.getArea());
+                                data.put("roomNumber", dept.getRoomNumber());
+                            }
                         }
                     }
                 }
             }
-        }
 
-        return ResponseVo.success(data);
+            return ResponseVo.success(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseVo.error(500, "查询问诊单失败: " + e.getMessage());
+        }
     }
 
     @PostMapping("/consultation/save")
@@ -923,29 +926,53 @@ public class DoctorWorkController {
         Integer appointmentId = parseInteger(params.get("appointmentId"));
         String diagnosis = (String) params.get("diagnosis");
         String treatment = (String) params.get("treatment");
-        String doctorAdvice = (String) params.get("doctorAdvice");
+        String examination = (String) params.get("examination");
 
         if (appointmentId == null) {
             return ResponseVo.error(400, "预约ID不能为空");
         }
 
-        Appointment appointment = appointmentMapper.selectById(appointmentId);
-        if (appointment == null) {
-            return ResponseVo.error(404, "预约不存在");
-        }
+        try {
+            Appointment appointment = appointmentMapper.selectById(appointmentId);
+            if (appointment == null) {
+                return ResponseVo.error(404, "预约不存在");
+            }
 
-        // 查找或创建问诊单
-        ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
-        if (form == null) {
-            form = new ConsultationForm();
-            form.setAppointmentId(appointmentId);
-            form.setDiagnosis(diagnosis);
-            form.setTreatment(treatment);
-            form.setDoctorAdvice(doctorAdvice);
-            consultationFormMapper.insert(form);
-        } else {
-            form.setDiagnosis(diagnosis);
-            form.setTreatment(treatment);
+            // 查找或创建问诊单
+            ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
+            if (form == null) {
+                form = new ConsultationForm();
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMddHHmmss");
+                form.setConsultationNo("CF" + sdf.format(new Date()));
+                form.setAppointmentId(appointmentId);
+                form.setUserId(appointment.getUserId());
+                form.setDiagnosis(diagnosis);
+                form.setTreatment(treatment);
+                form.setExamination(examination);
+                form.setStatus(1); // 已完成
+                consultationFormMapper.insert(form);
+            } else {
+                form.setDiagnosis(diagnosis);
+                form.setTreatment(treatment);
+                form.setExamination(examination);
+                form.setStatus(1); // 已完成
+                consultationFormMapper.update(form);
+            }
+
+            // 更新预约状态为已完成
+            appointment.setStatus(3);
+            appointmentMapper.update(appointment);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("appointmentId", appointmentId);
+            result.put("status", 3);
+
+            return ResponseVo.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
+        }
+    }
             form.setDoctorAdvice(doctorAdvice);
             consultationFormMapper.update(form);
         }

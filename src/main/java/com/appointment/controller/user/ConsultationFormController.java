@@ -2,12 +2,16 @@ package com.appointment.controller.user;
 
 import com.appointment.entity.Appointment;
 import com.appointment.entity.ConsultationForm;
-import com.appointment.mapper.AppointmentMapper;
-import com.appointment.mapper.ConsultationFormMapper;
+import com.appointment.entity.Doctor;
+import com.appointment.entity.Schedule;
+import com.appointment.entity.NumberSource;
+import com.appointment.mapper.*;
 import com.appointment.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -19,6 +23,9 @@ public class ConsultationFormController {
 
     @Autowired
     private AppointmentMapper appointmentMapper;
+
+    @Autowired
+    private DoctorMapper doctorMapper;
 
     /**
      * 保存问诊信息（预约后补充填写）
@@ -33,12 +40,36 @@ public class ConsultationFormController {
             // 检查是否已存在
             ConsultationForm existing = consultationFormMapper.selectByAppointmentId(form.getAppointmentId());
             if (existing != null) {
-                existing.setConsultationType(form.getConsultationType());
+                existing.setFormType(form.getFormType());
                 existing.setChiefComplaint(form.getChiefComplaint());
-                existing.setMedicalHistory(form.getMedicalHistory());
-                existing.setRecoveryHistory(form.getRecoveryHistory());
+                existing.setPresentIllness(form.getPresentIllness());
+                existing.setPastHistory(form.getPastHistory());
                 consultationFormMapper.update(existing);
                 return ResponseVo.success(existing);
+            }
+
+            // 新创建，补充信息
+            Appointment appointment = appointmentMapper.selectById(form.getAppointmentId());
+            if (appointment == null) {
+                return ResponseVo.error(404, "预约不存在");
+            }
+
+            // 自动生成问诊编号
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            form.setConsultationNo("CF" + sdf.format(new Date()));
+
+            // 设置user_id和doctor_id
+            form.setUserId(appointment.getUserId());
+
+            NumberSource ns = null;
+            if (appointment.getNumberSourceId() != null) {
+                ns = numberSourceMapper.selectById(appointment.getNumberSourceId());
+                if (ns != null) {
+                    Schedule schedule = scheduleMapper.selectById(ns.getScheduleId());
+                    if (schedule != null) {
+                        form.setDoctorId(schedule.getDoctorId());
+                    }
+                }
             }
 
             consultationFormMapper.insert(form);
@@ -48,6 +79,11 @@ public class ConsultationFormController {
             return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
         }
     }
+
+    @Autowired
+    private NumberSourceMapper numberSourceMapper;
+    @Autowired
+    private ScheduleMapper scheduleMapper;
 
     /**
      * 获取问诊详情
@@ -64,12 +100,20 @@ public class ConsultationFormController {
                 return ResponseVo.error(404, "问诊单不存在");
             }
 
-            // 补充患者信息
+            // 补充患者和医生信息
             Appointment appointment = appointmentMapper.selectById(appointmentId);
             if (appointment != null) {
                 form.setPatientName(appointment.getPatientName());
                 form.setPatientIdCard(appointment.getPatientIdCard());
-                form.setStatus(appointment.getStatus());
+                form.setAppointmentStatus(appointment.getStatus());
+            }
+
+            if (form.getDoctorId() != null) {
+                Doctor doctor = doctorMapper.selectById(form.getDoctorId());
+                if (doctor != null) {
+                    form.setDoctorName(doctor.getName());
+                    form.setDoctorTitle(doctor.getTitle());
+                }
             }
 
             return ResponseVo.success(form);
