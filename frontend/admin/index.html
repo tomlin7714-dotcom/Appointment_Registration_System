@@ -528,25 +528,45 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">用户列表</span>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <div style="display: flex; gap: 5px;">
-                                <input type="text" id="userSearch" placeholder="搜索用户姓名或手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 200px;">
-                                <button class="btn btn-primary" onclick="loadUserList()" style="padding: 8px 16px;">搜索</button>
-                            </div>
+                        <span class="card-title">查询条件</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>手机号码</label>
+                            <input type="text" id="userPhoneSearch" placeholder="输入手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 150px;">
                         </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>用户姓名</label>
+                            <input type="text" id="userNameSearch" placeholder="输入姓名" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 150px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>注册开始</label>
+                            <input type="date" id="userStartTime" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>注册结束</label>
+                            <input type="date" id="userEndTime" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="loadUserList()" style="height: 40px;">查询</button>
+                        <button class="btn" onclick="resetUserSearch()" style="height: 40px; background: #f0f0f0; color: #666;">重置</button>
+                        <button class="btn btn-primary" onclick="openUserModal()" style="height: 40px;">+ 新增用户</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">用户列表</span>
                     </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>姓名</th>
-                                    <th>手机号</th>
-                                    <th>身份证号</th>
-                                    <th>状态</th>
-                                    <th>注册时间</th>
-                                    <th>操作</th>
+                                    <th style="width: 60px;">序号</th>
+                                    <th>用户名</th>
+                                    <th>手机号码</th>
+                                    <th>用户角色</th>
+                                    <th>最近登录时间</th>
+                                    <th>账号状态</th>
+                                    <th style="width: 180px;">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="userTableBody">
@@ -556,6 +576,48 @@
                     <div class="pagination-container">
                         <div class="pagination-info" id="userPaginationInfo"></div>
                         <div class="pagination-buttons" id="userPagination"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户编辑模态框 -->
+            <div class="modal" id="userModal">
+                <div class="modal-content" style="width: 450px;">
+                    <div class="modal-header">
+                        <span class="modal-title" id="userModalTitle">新增用户</span>
+                        <button class="modal-close" onclick="closeUserModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="userForm">
+                            <input type="hidden" id="userId">
+                            <div class="form-group">
+                                <label>用户姓名 *</label>
+                                <input type="text" id="userName" required placeholder="请输入姓名" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>手机号码 *</label>
+                                <input type="text" id="userPhone" required placeholder="请输入手机号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>登录密码 *</label>
+                                <input type="password" id="userPwd" placeholder="请输入密码" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>身份证号</label>
+                                <input type="text" id="userIdCard" placeholder="请输入身份证号" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                            </div>
+                            <div class="form-group" id="userStatusGroup" style="display: none;">
+                                <label>账号状态</label>
+                                <select id="userStatus" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                                    <option value="0">启用</option>
+                                    <option value="1">禁用</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" onclick="closeUserModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                        <button class="btn btn-primary" onclick="saveUser()">保存</button>
                     </div>
                 </div>
             </div>
@@ -868,7 +930,7 @@
         let doctorPage = 1;
         let doctorPageSize = 10;
         let userPage = 1;
-        let userPageSize = 10;
+        let userPageSize = 5;
         let consultationPage = 1;
         let consultationPageSize = 9;
         
@@ -1344,20 +1406,24 @@
         }
         
         // ==================== 用户管理 ====================
-        
-        // 加载用户列表
+
         async function loadUserList() {
-            const keyword = document.getElementById('userSearch')?.value || '';
-            
+            const phone = document.getElementById('userPhoneSearch')?.value || '';
+            const keyword = document.getElementById('userNameSearch')?.value || '';
+            const startTime = document.getElementById('userStartTime')?.value || '';
+            const endTime = document.getElementById('userEndTime')?.value || '';
+
+            let url = `${API_BASE_URL}/api/admin/user/list?page=${userPage}&pageSize=${userPageSize}`;
+            if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+            if (phone) url += `&phone=${encodeURIComponent(phone)}`;
+            if (startTime) url += `&startTime=${startTime}`;
+            if (endTime) url += `&endTime=${endTime}`;
+
             try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/user/list?page=${userPage}&pageSize=${userPageSize}&keyword=${encodeURIComponent(keyword)}`, {
-                    headers: {
-                        'token': localStorage.getItem('adminToken')
-                    }
+                const response = await fetch(url, {
+                    headers: { 'token': localStorage.getItem('adminToken') }
                 });
-                
                 const data = await response.json();
-                
                 if (data.code === 200) {
                     renderUserTable(data.data.list);
                     renderPagination('user', data.data.total, data.data.page, data.data.pageSize);
@@ -1366,49 +1432,149 @@
                 }
             } catch (error) {
                 console.error('加载用户列表错误:', error);
-                showMessage('网络错误，请稍后重试', 'error');
+                showMessage('网络错误', 'error');
             }
         }
-        
-        // 渲染用户表格
+
+        function resetUserSearch() {
+            document.getElementById('userPhoneSearch').value = '';
+            document.getElementById('userNameSearch').value = '';
+            document.getElementById('userStartTime').value = '';
+            document.getElementById('userEndTime').value = '';
+            userPage = 1;
+            loadUserList();
+        }
+
         function renderUserTable(users) {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
-            
-            users.forEach(user => {
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无用户</td></tr>';
+                return;
+            }
+
+            users.forEach((user, index) => {
+                const statusText = user.status === 0 ? '正常' : '禁用';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.name}</td>
-                    <td>${user.phone}</td>
-                    <td>${user.idCard}</td>
-                    <td>${user.status === 0 ? '正常' : '禁用'}</td>
-                    <td>${user.createTime || '-'}</td>
+                    <td>${(userPage - 1) * userPageSize + index + 1}</td>
+                    <td>${user.name || '-'}</td>
+                    <td>${user.phone || '-'}</td>
+                    <td>${user.userRole || '普通用户'}</td>
+                    <td>${user.lastLoginTime ? new Date(user.lastLoginTime).toLocaleString('zh-CN', { hour12: false }) : '-'}</td>
+                    <td style="color: ${user.status === 0 ? '#27ae60' : '#e74c3c'};">${statusText}</td>
                     <td>
-                        <button class="btn ${user.status === 0 ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus(${user.id}, ${user.status})" style="padding: 5px 10px; font-size: 12px;">${user.status === 0 ? '禁用' : '启用'}</button>
+                        <button class="btn btn-success" style="padding: 4px 8px; font-size: 12px;" onclick="editUser(${user.id})">编辑</button>
+                        <button class="btn ${user.status === 0 ? 'btn-warning' : 'btn-success'}" style="padding: 4px 8px; font-size: 12px; ${user.status === 0 ? '' : 'background: #27ae60; color: white;'}" onclick="toggleUserStatus(${user.id}, ${user.status})">${user.status === 0 ? '禁用' : '启用'}</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser(${user.id})">删除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
-        
-        // 切换用户状态
-        async function toggleUserStatus(id, currentStatus) {
-            const action = currentStatus === 0 ? '禁用' : '启用';
-            if (!confirm(`确定要${action}该用户吗？`)) {
+
+        // 新增用户弹窗
+        function openUserModal() {
+            document.getElementById('userModalTitle').textContent = '新增用户';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userPwd').required = true;
+            document.getElementById('userStatusGroup').style.display = 'none';
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        async function editUser(id) {
+            document.getElementById('userModalTitle').textContent = '编辑用户';
+            document.getElementById('userForm').reset();
+            document.getElementById('userPwd').required = false;
+            document.getElementById('userStatusGroup').style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/user/get?id=${id}`, {
+                    headers: { 'token': localStorage.getItem('adminToken') }
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    const u = data.data;
+                    document.getElementById('userId').value = u.id;
+                    document.getElementById('userName').value = u.name || '';
+                    document.getElementById('userPhone').value = u.phone || '';
+                    document.getElementById('userPhone').readOnly = true;
+                    document.getElementById('userPwd').value = '';
+                    document.getElementById('userPwd').placeholder = '留空则不修改密码';
+                    document.getElementById('userIdCard').value = u.idCard || '';
+                    document.getElementById('userStatus').value = u.status || 0;
+                    document.getElementById('userModal').classList.add('active');
+                } else {
+                    showMessage(data.msg || '获取失败', 'error');
+                }
+            } catch (error) {
+                console.error('获取用户信息错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const pwd = document.getElementById('userPwd').value;
+            const idCard = document.getElementById('userIdCard').value.trim();
+            const status = document.getElementById('userStatus')?.value;
+
+            if (!name || !phone) {
+                showMessage('请填写必填项', 'error');
                 return;
             }
-            
+
+            if (!id && !pwd) {
+                showMessage('请输入登录密码', 'error');
+                return;
+            }
+
+            try {
+                const url = id ? `${API_BASE_URL}/api/admin/user/modify` : `${API_BASE_URL}/api/admin/user/save`;
+                const body = { name, phone, idCard };
+                if (id) {
+                    body.id = parseInt(id);
+                    body.status = parseInt(status);
+                }
+                if (pwd) body.pwd = pwd;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'token': localStorage.getItem('adminToken') },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    showMessage(id ? '修改成功' : '添加成功', 'success');
+                    closeUserModal();
+                    loadUserList();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存用户错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        async function toggleUserStatus(id, currentStatus) {
+            const action = currentStatus === 0 ? '禁用' : '启用';
+            if (!confirm(`确定要${action}该用户吗？`)) return;
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/admin/user/status?id=${id}&status=${currentStatus === 1 ? 0 : 1}`, {
                     method: 'GET',
-                    headers: {
-                        'token': localStorage.getItem('adminToken')
-                    }
+                    headers: { 'token': localStorage.getItem('adminToken') }
                 });
-                
                 const data = await response.json();
-                
                 if (data.code === 200) {
                     showMessage(`${action}成功`, 'success');
                     loadUserList();
@@ -1417,7 +1583,28 @@
                 }
             } catch (error) {
                 console.error('切换用户状态错误:', error);
-                showMessage('网络错误，请稍后重试', 'error');
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('确定要删除该用户吗？此操作不可恢复！')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/user/del?id=${id}`, {
+                    method: 'GET',
+                    headers: { 'token': localStorage.getItem('adminToken') }
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    showMessage('删除成功', 'success');
+                    loadUserList();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除用户错误:', error);
+                showMessage('网络错误', 'error');
             }
         }
         
