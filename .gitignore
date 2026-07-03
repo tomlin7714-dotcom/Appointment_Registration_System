@@ -49,7 +49,9 @@ classes/
 
 # 本地配置文件（避免上传敏感信息）
 application-local.yml
+application-local.properties
 application-dev.yml
+application-secret.properties
 *.properties.local
 
 # 前端相关（如果有前端代码可保留）
