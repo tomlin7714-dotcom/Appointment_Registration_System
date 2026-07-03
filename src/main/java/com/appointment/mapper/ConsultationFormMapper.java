@@ -14,4 +14,6 @@ public interface ConsultationFormMapper {
                                           @Param("keyword") String keyword);
     int insert(ConsultationForm consultationForm);
     int update(ConsultationForm consultationForm);
+    int deleteById(@Param("id") Integer id);
+    List<ConsultationForm> selectAll();
 }

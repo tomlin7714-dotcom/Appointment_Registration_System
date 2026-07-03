@@ -92,6 +92,23 @@
         VALUES (#{consultationNo}, #{appointmentId}, #{userId}, #{doctorId}, #{formType}, #{chiefComplaint}, #{presentIllness}, #{pastHistory}, NOW())
     </insert>
 
+    <select id="selectAll" resultMap="DetailResultMap">
+        SELECT cf.*, u.real_name AS patient_name, d.name AS doctor_name, d.title AS doctor_title,
+               dp.dept_name, s.visit_date, s.visit_time
+        FROM consultation_form cf
+        LEFT JOIN user u ON cf.user_id = u.id
+        LEFT JOIN doctor d ON cf.doctor_id = d.id
+        LEFT JOIN dept dp ON d.dept_id = dp.id
+        LEFT JOIN appointment a ON cf.appointment_id = a.id
+        LEFT JOIN number_source ns ON a.number_source_id = ns.id
+        LEFT JOIN schedule s ON ns.schedule_id = s.id
+        ORDER BY cf.create_time DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM consultation_form WHERE id = #{id}
+    </delete>
+
     <update id="update" parameterType="com.appointment.entity.ConsultationForm">
         UPDATE consultation_form
         SET form_type = #{formType},

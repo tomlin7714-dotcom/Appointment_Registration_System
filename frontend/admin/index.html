@@ -405,6 +405,9 @@
             <div class="menu-item" onclick="showSection('log')">
                 <span>📝</span> 系统日志
             </div>
+            <div class="menu-item" onclick="showSection('consultation')">
+                <span>📄</span> 问诊记录
+            </div>
             <div class="menu-item" onclick="showSection('setting')">
                 <span>⚙️</span> 系统配置
             </div>
@@ -582,6 +585,110 @@
                 </div>
             </div>
 
+            <!-- 问诊记录页面 -->
+            <div class="content-section" id="consultation-section">
+                <div class="content-header">
+                    <h2>问诊记录管理</h2>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">查询条件</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                            <label>医生姓名</label>
+                            <input type="text" id="consultationDoctorSearch" placeholder="搜索医生姓名" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                            <label>开始时间</label>
+                            <input type="date" id="consultationStartTime" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                            <label>结束时间</label>
+                            <input type="date" id="consultationEndTime" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; width: 100%;">
+                        </div>
+                        <button class="btn btn-primary" onclick="loadConsultationList()" style="height: 40px;">查询</button>
+                        <button class="btn" onclick="resetConsultationSearch()" style="height: 40px; background: #f0f0f0; color: #666;">重置</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">问诊列表</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">序号</th>
+                                    <th>问诊编号</th>
+                                    <th>患者姓名</th>
+                                    <th>医生姓名</th>
+                                    <th>问诊状态</th>
+                                    <th>创建时间</th>
+                                    <th style="width: 180px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="consultationTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="consultationPaginationInfo"></div>
+                        <div class="pagination-buttons" id="consultationPagination"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 问诊编辑模态框 -->
+            <div class="modal" id="consultationEditModal">
+                <div class="modal-content" style="width: 600px;">
+                    <div class="modal-header">
+                        <span class="modal-title" id="consultationEditTitle">编辑问诊单</span>
+                        <button class="modal-close" onclick="closeConsultationEditModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="consultationEditForm">
+                            <input type="hidden" id="editConsultationId">
+                            <div class="form-group">
+                                <label>问诊编号</label>
+                                <input type="text" id="editConsultationNo" readonly style="background: #f5f5f5;">
+                            </div>
+                            <div class="form-group">
+                                <label>患者姓名</label>
+                                <input type="text" id="editPatientName" readonly style="background: #f5f5f5;">
+                            </div>
+                            <div class="form-group">
+                                <label>医生姓名</label>
+                                <input type="text" id="editDoctorName" readonly style="background: #f5f5f5;">
+                            </div>
+                            <div class="form-group">
+                                <label>检查</label>
+                                <textarea id="editExamination" rows="2" placeholder="检查结果"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>诊断结果</label>
+                                <textarea id="editDiagnosis" rows="3" placeholder="诊断结果"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>治疗方案</label>
+                                <textarea id="editTreatment" rows="3" placeholder="治疗方案"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>状态</label>
+                                <select id="editFormStatus">
+                                    <option value="0">待诊断</option>
+                                    <option value="1">已完成</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" onclick="closeConsultationEditModal()" style="background: #e0e0e0; color: #333;">取消</button>
+                        <button class="btn btn-primary" onclick="saveConsultationEdit()">保存</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 系统配置页面 -->
             <div class="content-section" id="setting-section">
                 <div class="content-header">
@@ -713,6 +820,8 @@
         let doctorPageSize = 10;
         let userPage = 1;
         let userPageSize = 10;
+        let consultationPage = 1;
+        let consultationPageSize = 9;
         
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', function() {
@@ -742,6 +851,9 @@
             
             // 加载日志列表
             loadLogList();
+
+            // 加载问诊记录列表
+            loadConsultationList();
         });
         
         // 退出登录
@@ -1284,6 +1396,9 @@
                 } else if (type === 'doctor') {
                     doctorPage = currentPage - 1;
                     loadDoctorList();
+                } else if (type === 'consultation') {
+                    consultationPage = currentPage - 1;
+                    loadConsultationList();
                 } else {
                     userPage = currentPage - 1;
                     loadUserList();
@@ -1306,6 +1421,9 @@
                     } else if (type === 'doctor') {
                         doctorPage = i;
                         loadDoctorList();
+                    } else if (type === 'consultation') {
+                        consultationPage = i;
+                        loadConsultationList();
                     } else {
                         userPage = i;
                         loadUserList();
@@ -1325,6 +1443,9 @@
                 } else if (type === 'doctor') {
                     doctorPage = currentPage + 1;
                     loadDoctorList();
+                } else if (type === 'consultation') {
+                    consultationPage = currentPage + 1;
+                    loadConsultationList();
                 } else {
                     userPage = currentPage + 1;
                     loadUserList();
@@ -1364,6 +1485,9 @@
                     } else if (type === 'doctor') {
                         doctorPage = targetPage;
                         loadDoctorList();
+                    } else if (type === 'consultation') {
+                        consultationPage = targetPage;
+                        loadConsultationList();
                     } else {
                         userPage = targetPage;
                         loadUserList();
@@ -1419,8 +1543,205 @@
             });
         }
         
+        // ==================== 问诊记录管理 ====================
+
+        // 加载问诊记录列表
+        async function loadConsultationList() {
+            const doctorName = document.getElementById('consultationDoctorSearch')?.value || '';
+            const startTime = document.getElementById('consultationStartTime')?.value || '';
+            const endTime = document.getElementById('consultationEndTime')?.value || '';
+
+            let url = `${API_BASE_URL}/api/admin/consultation/list?page=${consultationPage}&pageSize=${consultationPageSize}`;
+            if (doctorName) url += `&doctorName=${encodeURIComponent(doctorName)}`;
+            if (startTime) url += `&startTime=${startTime}`;
+            if (endTime) url += `&endTime=${endTime}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'token': localStorage.getItem('adminToken') }
+                });
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    renderConsultationTable(data.data.list);
+                    renderPagination('consultation', data.data.total, data.data.page, data.data.pageSize);
+                } else {
+                    showMessage(data.msg || '加载失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载问诊记录错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        function resetConsultationSearch() {
+            document.getElementById('consultationDoctorSearch').value = '';
+            document.getElementById('consultationStartTime').value = '';
+            document.getElementById('consultationEndTime').value = '';
+            consultationPage = 1;
+            loadConsultationList();
+        }
+
+        function renderConsultationTable(list) {
+            const tbody = document.getElementById('consultationTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无问诊记录</td></tr>';
+                return;
+            }
+
+            list.forEach((item, index) => {
+                const statusText = item.status === 1 ? '已完成' : '待诊断';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${(consultationPage - 1) * consultationPageSize + index + 1}</td>
+                    <td>${item.consultationNo || '-'}</td>
+                    <td>${item.patientName || '-'}</td>
+                    <td>${item.doctorName || '-'}</td>
+                    <td><span style="color: ${item.status === 1 ? '#27ae60' : '#e67e22'};">${statusText}</span></td>
+                    <td>${item.createTime ? item.createTime.substring(0, 19) : '-'}</td>
+                    <td>
+                        <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="editConsultation(${item.id})">编辑</button>
+                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px; background: #f39c12; color: white;" onclick="toggleConsultationStatus(${item.id}, ${item.status})">${item.status === 1 ? '设为待诊断' : '设为已完成'}</button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteConsultation(${item.id})">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 编辑问诊单
+        async function editConsultation(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/consultation/get?id=${id}`, {
+                    headers: { 'token': localStorage.getItem('adminToken') }
+                });
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    const c = data.data;
+                    document.getElementById('editConsultationId').value = c.id;
+                    document.getElementById('editConsultationNo').value = c.consultationNo || '-';
+                    document.getElementById('editPatientName').value = c.patientName || '-';
+                    document.getElementById('editDoctorName').value = c.doctorName || '-';
+                    document.getElementById('editExamination').value = c.examination || '';
+                    document.getElementById('editDiagnosis').value = c.diagnosis || '';
+                    document.getElementById('editTreatment').value = c.treatment || '';
+                    document.getElementById('editFormStatus').value = c.status || 0;
+                    document.getElementById('consultationEditTitle').textContent = '编辑问诊单';
+                    document.getElementById('consultationEditModal').classList.add('active');
+                } else {
+                    showMessage(data.msg || '获取失败', 'error');
+                }
+            } catch (error) {
+                console.error('获取问诊单错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        function closeConsultationEditModal() {
+            document.getElementById('consultationEditModal').classList.remove('active');
+        }
+
+        async function saveConsultationEdit() {
+            const id = document.getElementById('editConsultationId').value;
+            const examination = document.getElementById('editExamination').value.trim();
+            const diagnosis = document.getElementById('editDiagnosis').value.trim();
+            const treatment = document.getElementById('editTreatment').value.trim();
+            const status = document.getElementById('editFormStatus').value;
+
+            try {
+                // 更新诊断信息
+                const res1 = await fetch(`${API_BASE_URL}/api/admin/consultation/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify({ id: parseInt(id), examination, diagnosis, treatment })
+                });
+                const data1 = await res1.json();
+                if (data1.code !== 200) {
+                    showMessage(data1.msg || '保存失败', 'error');
+                    return;
+                }
+
+                // 更新状态
+                const res2 = await fetch(`${API_BASE_URL}/api/admin/consultation/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify({ id: parseInt(id), status: parseInt(status) })
+                });
+                const data2 = await res2.json();
+                if (data2.code === 200) {
+                    showMessage('保存成功', 'success');
+                    closeConsultationEditModal();
+                    loadConsultationList();
+                } else {
+                    showMessage(data2.msg || '状态更新失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存问诊单错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        // 切换问诊状态
+        async function toggleConsultationStatus(id, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const action = newStatus === 1 ? '已完成' : '待诊断';
+            if (!confirm(`确定要将该问诊单设为"${action}"吗？`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/consultation/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify({ id, status: newStatus })
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    showMessage('状态更新成功', 'success');
+                    loadConsultationList();
+                } else {
+                    showMessage(data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('更新状态错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        // 删除问诊单
+        async function deleteConsultation(id) {
+            if (!confirm('确定要删除该问诊单吗？此操作不可恢复！')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/consultation/del?id=${id}`, {
+                    method: 'GET',
+                    headers: { 'token': localStorage.getItem('adminToken') }
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    showMessage('删除成功', 'success');
+                    loadConsultationList();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除问诊单错误:', error);
+                showMessage('网络错误', 'error');
+            }
+        }
+
         // ==================== 系统配置 ====================
-        
+
         document.getElementById('settingForm').addEventListener('submit', function(e) {
             e.preventDefault();
             showMessage('设置保存成功', 'success');
