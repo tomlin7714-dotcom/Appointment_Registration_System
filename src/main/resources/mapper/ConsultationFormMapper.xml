@@ -77,13 +77,17 @@
     </select>
 
     <insert id="insert" parameterType="com.appointment.entity.ConsultationForm" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO consultation_form (appointment_id, consultation_type, chief_complaint, medical_history, recovery_history, create_time)
-        VALUES (#{appointmentId}, #{consultationType}, #{chiefComplaint}, #{medicalHistory}, #{recoveryHistory}, NOW())
+        INSERT INTO consultation_form (appointment_id, consultation_type, chief_complaint, medical_history, recovery_history, diagnosis, treatment, doctor_advice, create_time)
+        VALUES (#{appointmentId}, #{consultationType}, #{chiefComplaint}, #{medicalHistory}, #{recoveryHistory}, #{diagnosis}, #{treatment}, #{doctorAdvice}, NOW())
     </insert>
 
     <update id="update" parameterType="com.appointment.entity.ConsultationForm">
         UPDATE consultation_form
-        SET diagnosis = #{diagnosis},
+        SET consultation_type = #{consultationType},
+            chief_complaint = #{chiefComplaint},
+            medical_history = #{medicalHistory},
+            recovery_history = #{recoveryHistory},
+            diagnosis = #{diagnosis},
             treatment = #{treatment},
             doctor_advice = #{doctorAdvice},
             update_time = NOW()

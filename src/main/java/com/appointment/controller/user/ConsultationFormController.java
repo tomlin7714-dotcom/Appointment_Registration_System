@@ -29,19 +29,24 @@ public class ConsultationFormController {
             return ResponseVo.error(400, "预约ID不能为空");
         }
 
-        // 检查是否已存在
-        ConsultationForm existing = consultationFormMapper.selectByAppointmentId(form.getAppointmentId());
-        if (existing != null) {
-            existing.setConsultationType(form.getConsultationType());
-            existing.setChiefComplaint(form.getChiefComplaint());
-            existing.setMedicalHistory(form.getMedicalHistory());
-            existing.setRecoveryHistory(form.getRecoveryHistory());
-            consultationFormMapper.update(existing);
-            return ResponseVo.success(existing);
-        }
+        try {
+            // 检查是否已存在
+            ConsultationForm existing = consultationFormMapper.selectByAppointmentId(form.getAppointmentId());
+            if (existing != null) {
+                existing.setConsultationType(form.getConsultationType());
+                existing.setChiefComplaint(form.getChiefComplaint());
+                existing.setMedicalHistory(form.getMedicalHistory());
+                existing.setRecoveryHistory(form.getRecoveryHistory());
+                consultationFormMapper.update(existing);
+                return ResponseVo.success(existing);
+            }
 
-        consultationFormMapper.insert(form);
-        return ResponseVo.success(form);
+            consultationFormMapper.insert(form);
+            return ResponseVo.success(form);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseVo.error(500, "保存问诊单失败: " + e.getMessage());
+        }
     }
 
     /**
@@ -53,20 +58,25 @@ public class ConsultationFormController {
             return ResponseVo.error(400, "预约ID不能为空");
         }
 
-        ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
-        if (form == null) {
-            return ResponseVo.error(404, "问诊单不存在");
-        }
+        try {
+            ConsultationForm form = consultationFormMapper.selectByAppointmentId(appointmentId);
+            if (form == null) {
+                return ResponseVo.error(404, "问诊单不存在");
+            }
 
-        // 补充患者信息
-        Appointment appointment = appointmentMapper.selectById(appointmentId);
-        if (appointment != null) {
-            form.setPatientName(appointment.getPatientName());
-            form.setPatientIdCard(appointment.getPatientIdCard());
-            form.setStatus(appointment.getStatus());
-        }
+            // 补充患者信息
+            Appointment appointment = appointmentMapper.selectById(appointmentId);
+            if (appointment != null) {
+                form.setPatientName(appointment.getPatientName());
+                form.setPatientIdCard(appointment.getPatientIdCard());
+                form.setStatus(appointment.getStatus());
+            }
 
-        return ResponseVo.success(form);
+            return ResponseVo.success(form);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseVo.error(500, "查询问诊单失败: " + e.getMessage());
+        }
     }
 
     /**
@@ -79,13 +89,18 @@ public class ConsultationFormController {
             return ResponseVo.error(400, "用户ID不能为空");
         }
 
-        List<ConsultationForm> list;
-        if (keyword != null && !keyword.isEmpty()) {
-            list = consultationFormMapper.searchByUserId(userId, keyword);
-        } else {
-            list = consultationFormMapper.selectByUserId(userId);
-        }
+        try {
+            List<ConsultationForm> list;
+            if (keyword != null && !keyword.isEmpty()) {
+                list = consultationFormMapper.searchByUserId(userId, keyword);
+            } else {
+                list = consultationFormMapper.selectByUserId(userId);
+            }
 
-        return ResponseVo.success(list);
+            return ResponseVo.success(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseVo.error(500, "查询问诊列表失败: " + e.getMessage());
+        }
     }
 }

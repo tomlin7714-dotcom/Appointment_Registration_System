@@ -341,9 +341,9 @@ Page({
         }
 
         wx.hideLoading();
-        
+
         console.log('预约创建返回数据:', res);
-        const appointmentId = res.data.appointmentId;
+        // appointmentId already declared above when saving consultation
         console.log('提取的appointmentId:', appointmentId);
         
         if (!appointmentId) {
