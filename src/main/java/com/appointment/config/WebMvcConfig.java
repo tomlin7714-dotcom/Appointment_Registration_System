@@ -17,5 +17,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         
         registry.addResourceHandler("/wechat/**")
                 .addResourceLocations("file:frontend/wechat/");
+
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
 }

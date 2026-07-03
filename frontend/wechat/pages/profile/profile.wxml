@@ -4,7 +4,8 @@
   <view class="user-card">
     <view class="user-info">
       <view class="user-avatar">
-        <text class="avatar-text">{{userInfo.realName ? userInfo.realName[0] : '👤'}}</text>
+        <image class="avatar-img" src="{{userInfo.avatar}}" mode="aspectFill" wx:if="{{userInfo.avatar}}" />
+        <text class="avatar-text" wx:else>{{userInfo.realName ? userInfo.realName[0] : '👤'}}</text>
       </view>
       <view class="user-detail">
         <text class="user-name">{{userInfo.realName || '未登录'}}</text>
