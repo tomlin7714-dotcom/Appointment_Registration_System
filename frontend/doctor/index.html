@@ -933,9 +933,9 @@
             <div class="modal-body" id="consultationModalBody" style="max-height: 65vh; overflow-y: auto;">
                 <div style="text-align: center; padding: 40px; color: #999;">加载中...</div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="consultationModalFooter">
                 <button class="btn" onclick="closeConsultationModal()" style="background: #e0e0e0; color: #333;">关闭</button>
-                <button class="btn btn-primary" onclick="saveConsultationFromModal()">💾 保存问诊单并完成就诊</button>
+                <button class="btn btn-primary" id="saveConsultationBtn" onclick="saveConsultationFromModal()">💾 保存问诊单并完成就诊</button>
             </div>
         </div>
     </div>
@@ -1644,7 +1644,8 @@
                     <td>
                         ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="callPatientById(${app.id})">叫号</button>` : ''}
                         ${app.status === 1 || app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="openConsultationModal(${app.id})">问诊</button>` : ''}
-                        ${app.status !== 1 && app.status !== 2 ? '-' : ''}
+                        ${app.status === 3 ? `<button class="btn btn-default" style="padding: 5px 10px; font-size: 12px; background: #e8f5e9; color: #388e3c;" onclick="openConsultationModal(${app.id})">查看</button>` : ''}
+                        ${app.status !== 1 && app.status !== 2 && app.status !== 3 ? '-' : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1718,7 +1719,8 @@
                         ${app.status === 1 ? `<button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="startConsultation(${app.id})">开始就诊</button>` : ''}
                         ${app.status === 1 || app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="openConsultationModal(${app.id})">问诊</button>` : ''}
                         ${app.status === 2 ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="completeAppointment(${app.id})">完成就诊</button>` : ''}
-                        ${app.status !== 1 && app.status !== 2 ? '-' : ''}
+                        ${app.status === 3 ? `<button class="btn btn-default" style="padding: 5px 10px; font-size: 12px; background: #e8f5e9; color: #388e3c;" onclick="openConsultationModal(${app.id})">查看</button>` : ''}
+                        ${app.status !== 1 && app.status !== 2 && app.status !== 3 ? '-' : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2034,6 +2036,9 @@
         }
 
         function renderConsultationModal(c) {
+            // 已完成的状态隐藏保存按钮
+            const isReadOnly = c.appointmentStatus === 3;
+            document.getElementById('saveConsultationBtn').style.display = isReadOnly ? 'none' : 'inline-block';
             let html = '';
 
             // 患者基本信息
@@ -2066,12 +2071,14 @@
             }
 
             // 医生填写区
-            html += '<div>';
-            html += '<h4 style="color: #e67e22; margin-bottom: 12px;">💊 医生填写</h4>';
-            html += '<div class="form-group"><label>检查</label><textarea id="modalExamination" rows="3" placeholder="请输入检查结果">' + (c.examination || '') + '</textarea></div>';
-            html += '<div class="form-group"><label>诊断结果 *</label><textarea id="modalDiagnosis" rows="3" placeholder="请输入诊断结果">' + (c.diagnosis || '') + '</textarea></div>';
-            html += '<div class="form-group"><label>治疗方案</label><textarea id="modalTreatment" rows="3" placeholder="请输入治疗方案">' + (c.treatment || '') + '</textarea></div>';
-            html += '</div>';
+            if (!isReadOnly) {
+                html += '<div>';
+                html += '<h4 style="color: #e67e22; margin-bottom: 12px;">💊 医生填写</h4>';
+                html += '<div class="form-group"><label>检查</label><textarea id="modalExamination" rows="3" placeholder="请输入检查结果">' + (c.examination || '') + '</textarea></div>';
+                html += '<div class="form-group"><label>诊断结果 *</label><textarea id="modalDiagnosis" rows="3" placeholder="请输入诊断结果">' + (c.diagnosis || '') + '</textarea></div>';
+                html += '<div class="form-group"><label>治疗方案</label><textarea id="modalTreatment" rows="3" placeholder="请输入治疗方案">' + (c.treatment || '') + '</textarea></div>';
+                html += '</div>';
+            }
 
             document.getElementById('consultationModalBody').innerHTML = html;
         }
