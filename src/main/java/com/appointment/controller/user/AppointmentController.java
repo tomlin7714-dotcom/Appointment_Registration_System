@@ -196,7 +196,7 @@ public class AppointmentController {
         }
 
         if (appointment.getStatus() != 0) {
-            return ResponseVo.error(400, "该预约已支付或已取消");
+            return ResponseVo.error(400, "该预约状态异常，无法支付");
         }
 
         appointment.setStatus(1);
@@ -323,7 +323,7 @@ public class AppointmentController {
             return ResponseVo.error(404, "预约不存在");
         }
 
-        if (appointment.getStatus() == 2 || appointment.getStatus() == 3) {
+        if (appointment.getStatus() == 2 || appointment.getStatus() == 3 || appointment.getStatus() == 4) {
             return ResponseVo.error(400, "该预约已完成或已取消，无法取消");
         }
 
